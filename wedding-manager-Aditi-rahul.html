@@ -1,0 +1,1335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wedding Manager · The Wedding Scrippt</title>
+<meta name="description" content="Private wedding manager — guests, travel, stay, transport, events, catering, budget and shagun in one place. Crafted by The Wedding Scrippt.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* =========================================================
+   THEME — change colours & fonts here
+   ========================================================= */
+:root{
+  --blush:#FCF6F3;   /* page background */
+  --paper:#FFFFFF;   /* cards */
+  --petal:#F8E6E3;   /* soft pink tint */
+  --rose:#C9707A;    /* rose pink */
+  --rose-l:#F4C9CF;
+  --wine:#8E2F44;    /* primary maroon */
+  --wine-d:#6B1F32;  /* deep maroon */
+  --ink:#3B2026;     /* text */
+  --muted:#8C7075;
+  --line:#EFDFDA;
+  --gold:#B8935A;    /* accents */
+  --gold-l:#F3E6D0;
+  --sky:#EDE7F1;     /* soft lilac for info badges */
+  --shadow:0 14px 36px -18px rgba(110,31,51,.28);
+  --r:16px;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Jost',system-ui,-apple-system,sans-serif;
+  --script:'Pinyon Script','Cormorant Garamond',cursive;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--blush);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+.serif{font-family:var(--serif)}
+.script{font-family:var(--script);font-weight:400}
+.dim{color:#C9B7B9}
+.hidden{display:none!important}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.kicker{letter-spacing:.32em;text-transform:uppercase;font-size:11px;color:var(--muted)}
+.mono{font-family:var(--serif);font-style:italic;font-weight:400;line-height:1;color:var(--wine)}
+.mono b{font-family:var(--script);font-style:normal;font-weight:400;color:var(--gold);font-size:.62em;margin:0 .12em;vertical-align:.12em}
+
+/* ornament */
+.orn{display:flex;align-items:center;gap:10px;justify-content:center;color:var(--gold);margin:16px auto}
+.orn span{height:1px;width:64px;background:linear-gradient(90deg,transparent,var(--gold))}
+.orn span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+.orn i{width:7px;height:7px;border:1px solid var(--gold);transform:rotate(45deg)}
+
+/* ---------- landing ---------- */
+.landing{min-height:100vh;position:relative;overflow:hidden;display:grid;place-items:center;padding:56px 16px 40px;
+  background:radial-gradient(900px 520px at 12% 0%,#FBE1E2 0,transparent 62%),radial-gradient(820px 560px at 100% 100%,#F5DCD2 0,transparent 60%),var(--blush);background-size:cover;background-position:center}
+.landing.has-img::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(252,246,243,.86),rgba(252,246,243,.93))}
+.corner{position:absolute;width:min(36vw,310px);color:var(--rose);opacity:.5;pointer-events:none}
+.corner.tl{top:-8px;left:-8px}.corner.tr{top:-8px;right:-8px;transform:scaleX(-1)}
+.corner.bl{bottom:-8px;left:-8px;transform:scaleY(-1)}.corner.br{bottom:-8px;right:-8px;transform:rotate(180deg)}
+.land{position:relative;z-index:1;text-align:center;width:100%;max-width:720px}
+.land .mono{font-size:clamp(78px,12vw,128px);margin:8px 0 2px}
+.land h1{font-family:var(--serif);font-weight:500;font-size:clamp(30px,4.4vw,44px);margin:0;letter-spacing:.01em}
+.land .meta{color:var(--muted);margin-top:6px;letter-spacing:.06em}
+.cd{display:flex;justify-content:center;gap:clamp(8px,2.4vw,18px);margin-top:4px}
+.cd div{width:clamp(66px,15vw,84px);padding:12px 0 10px;border:1px solid var(--gold-l);border-radius:14px;background:rgba(255,255,255,.6)}
+.cd strong{display:block;font-family:var(--serif);font-weight:500;font-size:clamp(26px,5vw,34px);line-height:1;color:var(--wine)}
+.cd small{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:540px;margin:30px auto 0}
+.arch{position:relative;border-radius:220px 220px 20px 20px;border:1px solid var(--line);background:rgba(255,255,255,.78);padding:46px 16px 24px;cursor:pointer;transition:.25s;text-align:center}
+.arch::before{content:"";position:absolute;inset:7px;border-radius:inherit;border:1px solid var(--gold-l);pointer-events:none}
+.arch:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.arch.on{border-color:var(--wine);box-shadow:0 18px 40px -20px rgba(110,31,51,.5)}
+.arch .script{font-size:30px;color:var(--rose);line-height:1}
+.arch strong{display:block;font-family:var(--serif);font-weight:500;font-size:26px;color:var(--wine);margin-top:4px}
+.arch small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.pinbox{max-width:440px;margin:18px auto 0;padding:16px;border-radius:18px;background:rgba(255,255,255,.85);border:1px solid var(--line);animation:rise .3s ease}
+.pinbox form{display:flex;gap:8px}
+.pinbox input{flex:1;text-align:center;letter-spacing:.35em}
+.pinbox p{margin:8px 0 0;font-size:12px;color:var(--muted)}
+.guestbtn{margin-top:22px;display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border-radius:999px;border:0;cursor:pointer;color:#fff;font-size:15px;letter-spacing:.04em;
+  background:linear-gradient(135deg,#D8848F,#A23C55 55%,#8E2F44);box-shadow:0 16px 30px -14px rgba(142,47,68,.7);transition:.2s}
+.guestbtn:hover{transform:translateY(-2px)}
+.brandline{margin-top:26px;font-size:12px;color:var(--muted)}
+.brandline a{color:var(--wine);text-decoration:none;border-bottom:1px solid var(--gold-l)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- form controls ---------- */
+.in,select.in,textarea.in{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#FFFCFB;outline:none;transition:.15s}
+.in:focus{border-color:var(--rose);background:#fff;box-shadow:0 0 0 3px rgba(201,112,122,.18)}
+.in:disabled{background:#F6EFED;color:var(--muted)}
+textarea.in{min-height:84px;resize:vertical}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;letter-spacing:.04em;color:var(--muted)}
+label.f.wide{grid-column:1/-1}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.checks label{display:flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--ink);cursor:pointer;background:#FFFCFB}
+.checks input,.tog input{accent-color:var(--wine)}
+.tog{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);cursor:pointer}
+.tog input{width:18px;height:18px;flex:none}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--paper);cursor:pointer;font-size:14px;white-space:nowrap;transition:.15s;text-decoration:none}
+.btn:hover{border-color:var(--rose)}
+.btn.pri{background:var(--wine);color:#fff;border-color:var(--wine)}
+.btn.pri:hover{background:var(--wine-d)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#fff}
+.btn.ghost{background:transparent}
+.btn.sm{padding:7px 12px;font-size:13px}
+.btn.danger{color:#9C3B45;border-color:#F0D2D2}
+.btn.wa{color:#1F7A4D;border-color:#CDE9D9}
+.ic{width:32px;height:32px;display:inline-grid;place-items:center;border-radius:9px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);text-decoration:none}
+.ic:hover{background:var(--petal);color:var(--wine)}
+.ic.wa:hover{background:#E3F4EA;color:#1F7A4D}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:254px minmax(0,1fr);min-height:100vh}
+.side{background:linear-gradient(180deg,#FFFAF8,#F7E5E1);border-right:1px solid var(--line);padding:26px 14px 18px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.side .sm-mono{font-size:42px;text-align:center}
+.side .sm-meta{text-align:center;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin:8px 0 18px}
+.nav{display:flex;flex-direction:column;gap:2px;overflow:auto;flex:1}
+.nav button{display:flex;align-items:center;gap:12px;padding:10px 12px;border:0;border-radius:12px;background:transparent;color:#6E3B47;cursor:pointer;text-align:left;font-size:14px}
+.nav button:hover{background:rgba(142,47,68,.06)}
+.nav button.on{background:var(--wine);color:#fff;box-shadow:0 10px 20px -12px rgba(110,31,51,.7)}
+.nav .lk{margin-left:auto;width:14px;height:14px;opacity:.55}
+.side .who{margin-top:12px;padding:12px;border-radius:14px;background:rgba(142,47,68,.06);font-size:12px;color:var(--muted)}
+.side .who strong{color:var(--wine);font-weight:500;font-size:13px}
+.side .who .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.side .who .btn{margin-top:8px;width:100%;justify-content:center}
+.side .credit{margin-top:12px;text-align:center;font-size:11px;color:var(--muted)}
+.side .credit a{color:var(--wine);text-decoration:none}
+.side .mob-out{display:none}
+.main{padding:30px clamp(16px,3vw,40px) 60px;min-width:0}
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.ph h1{font-family:var(--serif);font-weight:500;font-size:clamp(30px,3.2vw,40px);margin:0;line-height:1.1}
+.ph p{margin:4px 0 0;color:var(--muted)}
+.ph .acts{display:flex;gap:8px;flex-wrap:wrap}
+.role-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--gold-l);color:#7A5E31;font-size:11px;letter-spacing:.08em;text-transform:uppercase;vertical-align:1px}
+.role-pill svg{width:13px;height:13px}
+
+/* ---------- banner ---------- */
+.banner{position:relative;border-radius:24px;overflow:hidden;min-height:220px;display:flex;align-items:flex-end;padding:26px 28px;color:#fff;margin-bottom:22px;
+  background:linear-gradient(125deg,#D1868F,#A23C55 50%,#7A2639);background-size:cover;background-position:center;box-shadow:var(--shadow)}
+.banner::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 15%,rgba(74,18,32,.62))}
+.banner .bfl{position:absolute;right:-20px;top:-20px;width:220px;color:#fff;opacity:.2}
+.banner > *{position:relative}
+.banner h2{font-family:var(--serif);font-weight:500;font-size:clamp(30px,4vw,46px);margin:0;line-height:1}
+.banner .bmeta{opacity:.92;margin-top:6px;font-size:14px;letter-spacing:.04em}
+.banner .days{margin-left:auto;text-align:right}
+.banner .days strong{font-family:var(--serif);font-size:56px;font-weight:500;line-height:1;display:block}
+.banner .days small{letter-spacing:.24em;text-transform:uppercase;font-size:11px;opacity:.85}
+.bwrap{display:flex;align-items:flex-end;gap:20px;width:100%;flex-wrap:wrap}
+
+/* ---------- cards ---------- */
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(178px,1fr));margin-bottom:22px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px 18px 16px}
+.kpi .lbl{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.kpi .lbl svg{color:var(--gold)}
+.kpi .val{font-family:var(--serif);font-size:36px;font-weight:500;line-height:1.1;margin-top:8px;color:var(--ink)}
+.kpi .sub{font-size:12px;color:var(--muted)}
+.kpi.accent{background:linear-gradient(150deg,#fff,#FBE9E8)}
+.cols{grid-template-columns:1.25fr 1fr}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.card h3{font-family:var(--serif);font-weight:500;font-size:22px;margin:0 0 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card h3 small{font-family:var(--sans);font-size:12px;color:var(--muted);font-weight:400;margin-left:auto}
+.card h3 svg{color:var(--gold)}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li .grow{flex:1;min-width:0}
+.li .t{font-weight:500}
+.li .s{font-size:12.5px;color:var(--muted)}
+.dot{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--petal);color:var(--wine);flex:none}
+.bar{height:9px;border-radius:999px;background:var(--petal);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--rose),var(--wine));border-radius:999px}
+.bar.gold i{background:linear-gradient(90deg,var(--gold-l),var(--gold))}
+.empty{padding:34px;text-align:center;color:var(--muted)}
+.note{font-size:12.5px;color:var(--muted)}
+
+/* ---------- toolbar / table ---------- */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.search{position:relative;flex:1;min-width:200px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search .in{padding-left:38px;border-radius:999px;background:var(--paper)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper);cursor:pointer;font-size:13px}
+.chip.on{background:var(--wine);color:#fff;border-color:var(--wine)}
+.tablewrap{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th{position:sticky;top:0;background:#FFF9F7;text-align:left;font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:13px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid #F5EAE7;vertical-align:top;font-size:14px}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#FFFAF9}
+td.act{white-space:nowrap;text-align:right;width:1%}
+td:first-child{font-weight:500}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;background:var(--petal);font-size:12px;margin:1px 2px 1px 0;color:var(--wine)}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;background:#F1E9E4;color:#6B4D45;white-space:nowrap}
+.b-confirmed,.b-fully-paid,.b-done,.b-given,.b-allocated,.b-collected,.b-set{background:#E6F1EA;color:#2F6B4A}
+.b-pending,.b-to-do,.b-unpaid,.b-medium,.b-advance-paid,.b-needed{background:var(--gold-l);color:#7D6036}
+.b-declined,.b-high,.b-off{background:#F9DEDF;color:#93323F}
+.b-tentative,.b-in-progress,.b-on-duty,.b-checked-in{background:var(--sky);color:#5E4C78}
+.b-low,.b-checked-out,.b-own{background:#F3EEEC;color:#7C6E6A}
+.b-bride{background:#FBE3E7;color:#A23C55}.b-groom{background:#E9E5F3;color:#55467A}.b-shared{background:#F3EEEC;color:#7C6E6A}
+.mode{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.mode svg{width:15px;height:15px;color:var(--gold)}
+
+/* ---------- travel board ---------- */
+.day{margin-bottom:22px}
+.day h4{font-family:var(--serif);font-weight:500;font-size:22px;margin:0 0 10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.day h4 span{font-family:var(--sans);font-size:12px;color:var(--muted);font-weight:400}
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.tc{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:15px 16px;position:relative}
+.tc .time{font-family:var(--serif);font-size:24px;line-height:1;color:var(--wine)}
+.tc .nm{font-weight:500;margin-top:6px}
+.tc .ln{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-top:3px}
+.tc .ln svg{width:14px;height:14px}
+.tc .flag{position:absolute;top:14px;right:14px;display:flex;gap:4px}
+.tc.warn{border-color:#EBCB9E;background:linear-gradient(180deg,#fff,#FFF8EC)}
+.tc .acts{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+
+/* ---------- events ---------- */
+.evs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:22px}
+.ev{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:20px;position:relative;overflow:hidden}
+.ev::after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#FAD9DD,transparent 70%)}
+.ev > *{position:relative;z-index:1}
+.ev .d{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.ev h5{font-family:var(--serif);font-size:28px;font-weight:500;margin:6px 0 8px;line-height:1;color:var(--wine)}
+.ev .ln{font-size:13px;color:var(--muted)}
+
+/* ---------- guest portal ---------- */
+.pbg{min-height:100vh;background:radial-gradient(900px 500px at 0% 0%,#FADDE1 0,transparent 60%),radial-gradient(900px 600px at 100% 40%,#F9E3DA 0,transparent 60%),#FDF3F2}
+.portal{max-width:880px;margin:0 auto}
+.pcover{border-radius:30px;overflow:hidden;min-height:380px;position:relative;display:grid;place-items:center;text-align:center;color:#fff;padding:74px 24px 56px;margin-bottom:22px;
+  background:linear-gradient(155deg,#EDA8B2,#CB6C7F 40%,#9B3550 80%,#7A2639);background-size:cover;background-position:center;box-shadow:0 30px 60px -30px rgba(122,38,57,.6)}
+.pcover.has-img::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(122,38,57,.35),rgba(90,22,40,.7))}
+.pcover > *{position:relative;z-index:2}
+.pcover > .toran{position:absolute;top:0;left:0;right:0;height:34px;z-index:3;
+  background:radial-gradient(circle at 50% 21px,#F5DEA6 3px,transparent 4px) 0 0/34px 34px repeat-x,
+             radial-gradient(circle at 50% 0,#F6B04F 10px,transparent 11px) 17px 0/34px 34px repeat-x,
+             radial-gradient(circle at 50% 0,#FCE3E8 16px,transparent 17px) 0 0/34px 34px repeat-x}
+.pcover > .pfl{position:absolute;width:190px;color:#fff;opacity:.28;z-index:1}
+.pcover > .pfl.l{left:-14px;bottom:-14px;transform:scaleY(-1)}
+.pcover > .pfl.r{right:-14px;bottom:-14px;transform:rotate(180deg)}
+.pcover .script{font-size:clamp(36px,6vw,52px);line-height:1;color:#FFE9EC}
+.pcover .mono{color:#fff;font-size:clamp(64px,10vw,96px);margin:6px 0 4px}
+.pcover .mono b{color:#F5DEA6}
+.pcover h2{font-family:var(--serif);font-weight:500;font-size:clamp(28px,4vw,40px);margin:0}
+.pcover p{margin:6px 0 0;opacity:.95;letter-spacing:.05em}
+.pcover .pdays{display:inline-block;margin-top:16px;padding:8px 18px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.pcover > .petal{position:absolute;top:-24px;width:12px;height:16px;border-radius:12px 0 12px 0;background:rgba(255,228,233,.9);z-index:1;animation:fall linear infinite}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0)}100%{transform:translateY(440px) rotate(340deg);opacity:0}}
+.wcard{text-align:center;padding:28px 24px;background:linear-gradient(180deg,#fff,#FFF5F5);border:1px solid #F3D6D9}
+.wcard .script{font-size:36px;color:var(--rose);line-height:1}
+.wcard p{font-family:var(--serif);font-size:21px;margin:8px auto 0;max-width:600px;color:var(--ink)}
+.ptitle{text-align:center;margin:30px 0 14px}
+.ptitle .script{font-size:34px;color:var(--rose);line-height:1;display:block}
+.ptitle h3{font-family:var(--serif);font-weight:500;font-size:32px;margin:2px 0 0;color:var(--wine)}
+.pform{border-color:#F3D6D9;background:linear-gradient(180deg,#fff,#FFF8F8)}
+.pform .sec{color:var(--rose)}
+.thanks{padding:50px 24px}
+.thanks .script{font-size:56px}
+
+/* confetti */
+.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
+.popper{position:fixed;bottom:14px;z-index:71;pointer-events:none;font-size:clamp(46px,9vw,72px);line-height:1}
+.popper.l{left:14px}.popper.r{right:14px;transform:scaleX(-1)}
+.popper span{display:block;animation:pop 1.8s cubic-bezier(.2,.9,.3,1.3) forwards}
+@keyframes pop{0%{transform:scale(.2) rotate(-25deg);opacity:0}20%{transform:scale(1.2) rotate(6deg);opacity:1}35%{transform:scale(1) rotate(0)}80%{opacity:1}100%{opacity:0;transform:scale(1) translateY(10px)}}
+
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;background:rgba(59,32,38,.42);backdrop-filter:blur(3px);display:grid;place-items:center;z-index:50;padding:16px}
+.panel{width:100%;max-width:780px;max-height:92vh;overflow:auto;background:var(--blush);border-radius:22px;box-shadow:0 40px 90px -30px rgba(0,0,0,.45)}
+.panel.sm{max-width:420px}
+.panel header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--blush);z-index:1}
+.panel header h3{font-family:var(--serif);font-size:28px;font-weight:500;margin:0;color:var(--wine);display:flex;align-items:center;gap:10px}
+.panel header h3 svg{width:22px;height:22px;color:var(--gold)}
+.panel .body{padding:8px 24px 10px}
+.panel footer{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--blush)}
+.sec{margin:18px 0 8px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px}
+.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.locks{display:grid;grid-template-columns:1.1fr 1.3fr 1fr;gap:8px 12px;align-items:center}
+.locks .h{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.locks .nm{font-weight:500;display:flex;align-items:center;gap:8px}
+.locks .nm svg{color:var(--gold)}
+
+/* toast */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--wine-d);color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:80;box-shadow:var(--shadow);max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{position:sticky;top:0;height:auto;z-index:20;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line)}
+  .side .top{display:flex;align-items:center;justify-content:space-between}
+  .side .sm-mono{font-size:30px;text-align:left}
+  .side .sm-meta,.side .credit,.side .who{display:none}
+  .side .mob-out{display:inline-grid}
+  .nav{flex-direction:row;overflow-x:auto;margin-top:8px;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{flex:none;padding:8px 12px;font-size:13px}
+  .cols{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  .locks{grid-template-columns:1fr 1fr}
+  .locks .nm{grid-column:1/-1;margin-top:8px}
+  .locks .h{display:none}
+  .main{padding-top:20px}
+}
+@media (max-width:520px){
+  .sides{gap:10px}
+  .arch{padding:36px 10px 18px}
+  .arch strong{font-size:21px}
+  .arch .script{font-size:24px}
+  .banner{padding:20px}
+  .banner .days{margin-left:0;text-align:left}
+  .pinbox form{flex-direction:column}
+  .guestbtn{padding:13px 20px;font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){.pcover > .petal{display:none}.popper span,.pinbox{animation:none}}
+@media print{.side,.toolbar,.ph .acts,td.act{display:none!important}.shell{display:block}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal" class="modal hidden"></div>
+<div id="toast"></div>
+<input type="file" id="fileIn" class="hidden" accept=".xlsx,.xls,.csv">
+<input type="file" id="jsonIn" class="hidden" accept=".json">
+<input type="file" id="imgIn" class="hidden" accept="image/*">
+
+<script>
+/* =========================================================
+   QUICK CONFIG — edit per couple before deploying
+   (everything here can also be changed later in Settings)
+   ========================================================= */
+const BRAND = { name: 'The Wedding Scrippt', url: 'https://weddingscrippt.in' };
+const COUPLE_DEFAULTS = {
+  bride: 'Aditi', groom: 'Rahul',
+  date: '2026-12-12', time: '18:00', venue: 'The Leela Palace, Udaipur',
+  hashtag: '#AdiRaFairytale',
+  welcome: 'We are so happy you are coming! Please share your travel plans so we can welcome you properly.',
+  heroImg: '',    // paste an image URL here, or upload one in Settings
+  portalImg: '',
+  /* Each side is its own owner.
+     family = PIN shared with relatives helping out
+     owner  = master PIN (unlocks every section + Settings)
+     locks  = per-section access: open | pin | owner | hidden  */
+  access: {
+    Bride: { family:'1111', owner:'1212', budget:3500000, share:true, locks:{ budget:'owner', shagun:'owner' }, pins:{} },
+    Groom: { family:'2222', owner:'2121', budget:2500000, share:true, locks:{ budget:'owner', shagun:'owner' }, pins:{} }
+  }
+};
+const STORE_KEY = 'ws_wedding_manager_v2';
+
+/* =========================================================
+   ICONS & ORNAMENTS
+   ========================================================= */
+const P = {
+  dash:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  guests:'M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M20 19v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 5.2a3 3 0 0 1 0 5.6',
+  travel:'M21 4 3 11l7 2.5L12.5 21z M10 13.5 21 4',
+  rooms:'M3 19V7M3 14h18v5M21 14a3 3 0 0 0-3-3h-7v3M7 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3',
+  fleet:'M5 17h14v-4l-2-5H7l-2 5zM5 13h14M7.5 17v2M16.5 17v2M8 15h.01M16 15h.01',
+  events:'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+  catering:'M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 0-3 3-3 6s1 4 3 4v8',
+  budget:'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-3v3M16 13.5h2',
+  vendors:'M3 8h18v11H3zM8 8V5h8v3M3 13h18',
+  shagun:'M3 6h18v12H3zM3 7l9 6 9-6',
+  tasks:'M4 12l5 5L20 6',
+  portal:'M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z',
+  settings:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12h2M3 12h2M12 3v2M12 19v2M17 7l1.4-1.4M5.6 18.4 7 17M17 17l1.4 1.4M5.6 5.6 7 7',
+  out:'M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10',
+  plus:'M12 5v14M5 12h14', edit:'M4 20h4L19 9l-4-4L4 16zM14 6l4 4', trash:'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
+  search:'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4', down:'M12 4v11M7 10l5 5 5-5M5 20h14', up:'M12 20V9M7 14l5-5 5 5M5 4h14',
+  file:'M6 3h8l4 4v14H6zM14 3v4h4', x:'M6 6l12 12M18 6 6 18', check:'M4 12l5 5L20 6',
+  air:'M21 4 3 11l7 2.5L12.5 21z', train:'M7 3h10a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V5a2 2 0 0 1 2-2zM5 10h14M8 21l2-4M16 21l-2-4',
+  bus:'M5 4h14v13H5zM5 11h14M8 20v-3M16 20v-3M8 14h.01M16 14h.01', car:'M5 17h14v-4l-2-5H7l-2 5zM5 13h14M7.5 17v2M16.5 17v2',
+  local:'M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11zM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4',
+  phone:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2',
+  pin:'M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z', clock:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+  img:'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01',
+  lock:'M6 11h12v10H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3', key:'M14 10a4 4 0 1 0-3.5 4L4 20.5V22h3v-2h2v-2h2l1.5-1.5A4 4 0 0 0 14 10zM16 8h.01',
+  wa:'M4 20l1.4-4.2A8 8 0 1 1 8.6 19zM9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1a4 4 0 0 1-2-2l1-1-1-2z',
+  link:'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'
+};
+const I = n => `<svg class="i" viewBox="0 0 24 24"><path d="${P[n]||''}"/></svg>`;
+const MODE_ICON = { Air:'air', Train:'train', Bus:'bus', Car:'car', Local:'local' };
+const petals5 = (cx,cy,s) => `<g transform="translate(${cx} ${cy}) scale(${s})">${[0,72,144,216,288].map(a=>`<ellipse rx="7" ry="15" transform="rotate(${a}) translate(0 -14)"/>`).join('')}<circle r="4.5"/></g>`;
+const FLORAL = `<svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
+  <path d="M0 196C44 150 78 124 124 104S188 58 198 0"/><path d="M38 162c16-18 22-36 20-58"/><path d="M92 118c20-6 34-22 38-44"/>
+  <path d="M150 84c14-2 26-12 32-26"/><path d="M70 136q12-20 32-14q-10 18-32 14z"/><path d="M112 108q4-22 24-24q-2 20-24 24z"/>
+  <path d="M20 180q2-18 20-22q0 18-20 22z"/><path d="M166 50q10-14 26-12q-8 14-26 12z"/>
+  ${petals5(58,100,1)}${petals5(132,70,.78)}${petals5(184,52,.5)}
+  <circle cx="98" cy="146" r="2.5"/><circle cx="160" cy="112" r="2"/><circle cx="30" cy="130" r="2"/><circle cx="118" cy="36" r="2.5"/></svg>`;
+
+/* =========================================================
+   MODULE SCHEMAS  (add / remove fields here)
+   t: text|tel|email|number|money|date|time|datetime-local|select|multi|ref|textarea
+   list:1 = shown as a table column
+   ========================================================= */
+const MODES = ['Air','Train','Bus','Car','Local'];
+const SIDE2 = ['Bride','Groom'];
+const SIDE3 = ['Shared','Bride','Groom'];
+const MODS = {
+  guests:{ title:'Guest', fields:[
+    {k:'name',l:'Guest / Family name',t:'text',req:1,list:1,sec:'Guest details'},
+    {k:'side',l:'Side',t:'select',o:SIDE2},
+    {k:'relation',l:'Relation',t:'text',list:1,ph:'e.g. Mama ji, College friend'},
+    {k:'phone',l:'Phone / WhatsApp',t:'tel',list:1},
+    {k:'city',l:'Coming from (city)',t:'text'},
+    {k:'adults',l:'Adults',t:'number',list:1},
+    {k:'kids',l:'Kids',t:'number'},
+    {k:'rsvp',l:'RSVP',t:'select',o:['Pending','Confirmed','Tentative','Declined'],list:1,badge:1},
+    {k:'events',l:'Attending events',t:'multi',src:'events',wide:1},
+    {k:'diet',l:'Food preference',t:'select',o:['Veg','Jain','Non-Veg','Vegan']},
+    {k:'needs',l:'Special needs',t:'text',ph:'Wheelchair, elderly, infant…'},
+    {k:'arrMode',l:'Arriving by',t:'select',o:MODES,list:1,sec:'Arrival'},
+    {k:'arrDate',l:'Arrival date & time',t:'datetime-local',list:1},
+    {k:'arrRef',l:'Flight / Train / Bus no.',t:'text'},
+    {k:'arrPoint',l:'Arriving at',t:'text',ph:'Udaipur Airport, City Station…'},
+    {k:'pickup',l:'Pickup needed',t:'select',o:['Yes','No']},
+    {k:'depMode',l:'Leaving by',t:'select',o:MODES,sec:'Departure'},
+    {k:'depDate',l:'Departure date & time',t:'datetime-local'},
+    {k:'depRef',l:'Flight / Train / Bus no.',t:'text'},
+    {k:'drop',l:'Drop needed',t:'select',o:['Yes','No']},
+    {k:'hotel',l:'Hotel',t:'text',sec:'Stay & transport (filled by family)'},
+    {k:'room',l:'Room no.',t:'text',list:1},
+    {k:'driver',l:'Driver name',t:'text'},
+    {k:'carNo',l:'Car number',t:'text'},
+    {k:'driverPhone',l:'Driver phone',t:'tel'},
+    {k:'idProof',l:'ID proof',t:'select',o:['Pending','Collected']},
+    {k:'welcomeKit',l:'Welcome hamper',t:'select',o:['Not given','Given']},
+    {k:'notes',l:'Notes',t:'textarea',wide:1,sec:'Notes'}
+  ]},
+  rooms:{ title:'Room', fields:[
+    {k:'hotel',l:'Hotel / Property',t:'text',req:1,list:1},
+    {k:'roomNo',l:'Room no.',t:'text',req:1,list:1},
+    {k:'type',l:'Room type',t:'select',o:['Standard','Deluxe','Suite','Villa','Family room','Dormitory'],list:1},
+    {k:'capacity',l:'Capacity',t:'number',list:1},
+    {k:'checkIn',l:'Check-in',t:'date',list:1},
+    {k:'checkOut',l:'Check-out',t:'date',list:1},
+    {k:'guest',l:'Allotted to guest',t:'ref',src:'guests',list:1},
+    {k:'status',l:'Status',t:'select',o:['Available','Allocated','Checked-in','Checked-out'],list:1,badge:1},
+    {k:'side',l:'Belongs to',t:'select',o:SIDE3,list:1},
+    {k:'rate',l:'Rate per night',t:'money'},
+    {k:'notes',l:'Notes',t:'textarea',wide:1}
+  ]},
+  fleet:{ title:'Vehicle', fields:[
+    {k:'vehicle',l:'Vehicle',t:'text',req:1,list:1,ph:'Innova Crysta, Tempo Traveller…'},
+    {k:'carNo',l:'Car number',t:'text',req:1,list:1},
+    {k:'driver',l:'Driver name',t:'text',req:1,list:1},
+    {k:'driverPhone',l:'Driver phone',t:'tel',list:1},
+    {k:'seats',l:'Seats',t:'number'},
+    {k:'duty',l:'Duty',t:'select',o:['Airport pickup','Station pickup','Bus stand pickup','Local / Venue shuttle','Drop','On call'],list:1},
+    {k:'dutyDate',l:'Duty date & time',t:'datetime-local',list:1},
+    {k:'assignedTo',l:'Assigned guest',t:'ref',src:'guests',list:1},
+    {k:'status',l:'Status',t:'select',o:['Free','On duty','Off'],list:1,badge:1},
+    {k:'side',l:'Belongs to',t:'select',o:SIDE3},
+    {k:'rate',l:'Rate per day',t:'money'},
+    {k:'notes',l:'Notes',t:'textarea',wide:1}
+  ]},
+  events:{ title:'Event', fields:[
+    {k:'name',l:'Event',t:'text',req:1,list:1,ph:'Haldi, Mehendi, Sangeet…'},
+    {k:'date',l:'Date',t:'date',list:1},
+    {k:'time',l:'Time',t:'time',list:1},
+    {k:'venue',l:'Venue',t:'text',list:1},
+    {k:'dressCode',l:'Dress code',t:'text',list:1},
+    {k:'theme',l:'Theme / Decor',t:'text'},
+    {k:'music',l:'Music / Entertainment',t:'text'},
+    {k:'inCharge',l:'Person in charge',t:'text',list:1},
+    {k:'notes',l:'Run-of-show notes',t:'textarea',wide:1}
+  ]},
+  menu:{ title:'Menu', fields:[
+    {k:'event',l:'Event',t:'ref',src:'events',req:1,list:1},
+    {k:'meal',l:'Meal',t:'select',o:['Breakfast','Lunch','Hi-Tea','Dinner','Late-night snacks','Welcome drinks'],list:1},
+    {k:'items',l:'Menu items',t:'textarea',list:1,wide:1},
+    {k:'counters',l:'Live counters',t:'text',ph:'Chaat, Pasta, Jalebi…'},
+    {k:'caterer',l:'Caterer',t:'text',list:1},
+    {k:'plates',l:'Plates ordered',t:'number',list:1},
+    {k:'costPlate',l:'Cost per plate',t:'money',list:1},
+    {k:'side',l:'Belongs to',t:'select',o:SIDE3},
+    {k:'notes',l:'Notes',t:'textarea',wide:1}
+  ]},
+  budget:{ title:'Expense', fields:[
+    {k:'category',l:'Category',t:'select',o:['Venue','Decor','Catering','Photography & Video','Attire','Jewellery','Makeup & Mehendi','Entertainment','Travel','Accommodation','Invitations','Gifts & Hampers','Pandit & Rituals','Miscellaneous'],req:1,list:1},
+    {k:'item',l:'Item',t:'text',req:1,list:1},
+    {k:'vendor',l:'Vendor',t:'text',list:1},
+    {k:'estimated',l:'Estimated',t:'money',list:1},
+    {k:'actual',l:'Actual',t:'money',list:1},
+    {k:'paid',l:'Paid',t:'money',list:1},
+    {k:'due',l:'Next payment due',t:'date',list:1},
+    {k:'status',l:'Status',t:'select',o:['Unpaid','Advance paid','Fully paid'],list:1,badge:1},
+    {k:'side',l:'Belongs to',t:'select',o:SIDE3},
+    {k:'notes',l:'Notes',t:'textarea',wide:1}
+  ]},
+  vendors:{ title:'Vendor', fields:[
+    {k:'name',l:'Vendor / Company',t:'text',req:1,list:1},
+    {k:'service',l:'Service',t:'select',o:['Planner','Decorator','Caterer','Photographer','Makeup Artist','Mehendi Artist','DJ / Band','Choreographer','Pandit','Florist','Transport','Hotel','Other'],list:1},
+    {k:'contact',l:'Contact person',t:'text',list:1},
+    {k:'phone',l:'Phone',t:'tel',list:1},
+    {k:'email',l:'Email',t:'email'},
+    {k:'amount',l:'Contract amount',t:'money',list:1},
+    {k:'advance',l:'Advance paid',t:'money',list:1},
+    {k:'arrival',l:'Reporting time at venue',t:'datetime-local'},
+    {k:'side',l:'Belongs to',t:'select',o:SIDE3,list:1},
+    {k:'notes',l:'Notes',t:'textarea',wide:1}
+  ]},
+  shagun:{ title:'Shagun entry', fields:[
+    {k:'from',l:'Given by',t:'text',req:1,list:1},
+    {k:'side',l:'Side',t:'select',o:SIDE2},
+    {k:'relation',l:'Relation',t:'text',list:1},
+    {k:'type',l:'Type',t:'select',o:['Cash envelope','UPI','Cheque','Gift','Jewellery','Gold / Silver coin'],list:1},
+    {k:'amount',l:'Amount',t:'money',list:1},
+    {k:'gift',l:'Gift details',t:'text'},
+    {k:'event',l:'Received at',t:'ref',src:'events',list:1},
+    {k:'receivedBy',l:'Received by',t:'text',list:1},
+    {k:'envelopeNo',l:'Envelope no.',t:'text',list:1},
+    {k:'returnGift',l:'Return gift',t:'select',o:['Pending','Given'],list:1,badge:1},
+    {k:'notes',l:'Notes',t:'textarea',wide:1}
+  ]},
+  tasks:{ title:'Task', fields:[
+    {k:'task',l:'Task',t:'text',req:1,list:1},
+    {k:'assignee',l:'Assigned to',t:'text',list:1},
+    {k:'due',l:'Due',t:'date',list:1},
+    {k:'priority',l:'Priority',t:'select',o:['High','Medium','Low'],list:1,badge:1},
+    {k:'status',l:'Status',t:'select',o:['To do','In progress','Done'],list:1,badge:1},
+    {k:'side',l:'Belongs to',t:'select',o:SIDE3,list:1},
+    {k:'notes',l:'Notes',t:'textarea',wide:1}
+  ]}
+};
+const PORTAL_FIELDS = ['name','side','relation','phone','city','adults','kids','events','diet','needs','arrMode','arrDate','arrRef','arrPoint','pickup','depMode','depDate','depRef','drop','notes'];
+/* which section protects which data */
+const VIEW_OF = { guests:'guests', rooms:'rooms', fleet:'fleet', events:'events', menu:'catering', budget:'budget', vendors:'vendors', shagun:'shagun', tasks:'tasks' };
+const SECTIONS = [
+  ['guests','Guest List','guests'],['travel','Travel Desk','travel'],['rooms','Stay & Rooms','rooms'],['fleet','Transport','fleet'],
+  ['events','Events','events'],['catering','Catering','catering'],['budget','Budget','budget'],['vendors','Vendors','vendors'],
+  ['shagun','Shagun Register','shagun'],['tasks','Checklist','tasks'],['portal','Guest Portal','portal']
+];
+const NAV = [['dash','Overview','dash'], ...SECTIONS, ['settings','Settings','settings']];
+const LOCK_MODES = [['open','Open to family'],['pin','Own password'],['owner','Owner only'],['hidden','Hidden from family']];
+
+/* =========================================================
+   STATE & STORAGE
+   (localStorage keeps data on this device. To share live data
+   between both families, swap load()/save() for a backend such
+   as Supabase or Firebase — nothing else needs to change.)
+   ========================================================= */
+const uid = () => Math.random().toString(36).slice(2,10);
+const clone = o => JSON.parse(JSON.stringify(o));
+function seed(){
+  const ev = (name,date,time,venue,dressCode,inCharge,theme) => ({id:uid(),name,date,time,venue,dressCode,inCharge,theme});
+  const g = o => Object.assign({id:uid(),adults:2,kids:0,rsvp:'Confirmed',diet:'Veg',pickup:'Yes',drop:'Yes',idProof:'Pending',welcomeKit:'Not given',events:[]},o);
+  return {
+    settings: clone(COUPLE_DEFAULTS),
+    events:[
+      ev('Haldi','2026-12-10','10:30','Poolside Lawns','Yellow & white','Neha (cousin)','Marigold & mogra'),
+      ev('Mehendi','2026-12-10','17:00','Lake Terrace','Pastel pinks','Neha (cousin)','Boho garden'),
+      ev('Sangeet','2026-12-11','19:30','Grand Ballroom','Indo-western glam','Karan (friend)','Moonlit rose'),
+      ev('Wedding','2026-12-12','18:00','Palace Courtyard','Traditional','Mr. Sharma','Ivory & gold'),
+      ev('Reception','2026-12-13','20:00','Lakeside Pavilion','Formal','Mr. Mehta','Candlelit')
+    ],
+    guests:[
+      g({name:'Sharma Family',side:'Bride',relation:'Mama ji',phone:'98100 12345',city:'Delhi',adults:4,kids:1,arrMode:'Air',arrDate:'2026-12-09T11:40',arrRef:'6E 2154',arrPoint:'Udaipur Airport',depMode:'Air',depDate:'2026-12-14T13:10',depRef:'6E 2155',hotel:'The Leela Palace',room:'214',driver:'Ramesh',carNo:'RJ27 CA 4521',driverPhone:'94140 11111',events:['Haldi','Mehendi','Sangeet','Wedding','Reception']}),
+      g({name:'Ananya Kapoor',side:'Bride',relation:'Best friend',phone:'99100 22334',city:'Mumbai',adults:1,arrMode:'Air',arrDate:'2026-12-10T08:15',arrRef:'AI 645',arrPoint:'Udaipur Airport',diet:'Non-Veg',events:['Haldi','Mehendi','Sangeet','Wedding']}),
+      g({name:'Gupta Family',side:'Bride',relation:'Chacha ji',phone:'98290 55667',city:'Jaipur',adults:3,arrMode:'Car',arrDate:'2026-12-10T14:00',pickup:'No',drop:'No',diet:'Jain',rsvp:'Tentative'}),
+      g({name:'Verma Family',side:'Groom',relation:'Bua ji',phone:'98110 77889',city:'Lucknow',adults:3,kids:2,arrMode:'Train',arrDate:'2026-12-10T06:30',arrRef:'12963 Mewar Exp',arrPoint:'Udaipur City Station',hotel:'The Leela Palace',room:'118',events:['Mehendi','Sangeet','Wedding','Reception']}),
+      g({name:'Rohan & Simran',side:'Groom',relation:'College friends',phone:'97170 99887',city:'Bengaluru',adults:2,arrMode:'Air',arrDate:'2026-12-11T09:50',arrRef:'UK 693',arrPoint:'Udaipur Airport',diet:'Non-Veg',events:['Sangeet','Wedding','Reception']}),
+      g({name:'Mehta Family',side:'Groom',relation:'Mausi ji',phone:'98250 44556',city:'Ahmedabad',adults:4,arrMode:'Bus',arrDate:'2026-12-10T05:45',arrRef:'GSRTC Volvo',arrPoint:'Udaipur Bus Stand',rsvp:'Pending'}),
+      g({name:'Mr. & Mrs. Iyer',side:'Groom',relation:'Family friends',phone:'98400 33221',city:'Chennai',adults:2,rsvp:'Declined',pickup:'No',drop:'No'})
+    ],
+    rooms:[
+      {id:uid(),hotel:'The Leela Palace',roomNo:'214',type:'Suite',capacity:4,checkIn:'2026-12-09',checkOut:'2026-12-14',guest:'Sharma Family',status:'Allocated',side:'Bride',rate:38000},
+      {id:uid(),hotel:'The Leela Palace',roomNo:'118',type:'Family room',capacity:5,checkIn:'2026-12-10',checkOut:'2026-12-14',guest:'Verma Family',status:'Allocated',side:'Groom',rate:32000},
+      {id:uid(),hotel:'The Leela Palace',roomNo:'120',type:'Deluxe',capacity:2,checkIn:'2026-12-10',checkOut:'2026-12-14',guest:'',status:'Available',side:'Shared',rate:26000},
+      {id:uid(),hotel:'Lake Pichola Hotel',roomNo:'305',type:'Deluxe',capacity:3,checkIn:'2026-12-10',checkOut:'2026-12-14',guest:'',status:'Available',side:'Shared',rate:14000}
+    ],
+    fleet:[
+      {id:uid(),vehicle:'Innova Crysta',carNo:'RJ27 CA 4521',driver:'Ramesh',driverPhone:'94140 11111',seats:6,duty:'Airport pickup',dutyDate:'2026-12-09T11:15',assignedTo:'Sharma Family',status:'On duty',side:'Shared',rate:4500},
+      {id:uid(),vehicle:'Tempo Traveller',carNo:'RJ27 TB 7788',driver:'Suresh',driverPhone:'94140 22222',seats:12,duty:'Local / Venue shuttle',dutyDate:'2026-12-10T09:00',assignedTo:'',status:'Free',side:'Shared',rate:7000}
+    ],
+    menu:[
+      {id:uid(),event:'Sangeet',meal:'Dinner',items:'Dal makhani, paneer lababdar, Rajasthani gatte, biryani, tandoori platter, assorted breads',counters:'Chaat, pasta, kulfi',caterer:'Royal Rasoi',plates:350,costPlate:2800,side:'Shared'},
+      {id:uid(),event:'Haldi',meal:'Lunch',items:'Rajasthani thali — dal baati churma, ker sangri, missi roti',counters:'Fresh juice bar',caterer:'Royal Rasoi',plates:180,costPlate:1600,side:'Bride'}
+    ],
+    budget:[
+      {id:uid(),category:'Venue',item:'Palace venue — 4 nights',vendor:'The Leela Palace',estimated:1800000,actual:1850000,paid:900000,due:'2026-11-20',status:'Advance paid',side:'Bride'},
+      {id:uid(),category:'Decor',item:'All functions decor',vendor:'Petals & Pearls',estimated:900000,actual:850000,paid:300000,due:'2026-11-30',status:'Advance paid',side:'Bride'},
+      {id:uid(),category:'Invitations',item:'Website invitation + video',vendor:'The Wedding Scrippt',estimated:25000,actual:25000,paid:25000,status:'Fully paid',side:'Bride'},
+      {id:uid(),category:'Photography & Video',item:'Photo + cinematic film',vendor:'Frames by Kabir',estimated:450000,actual:450000,paid:450000,status:'Fully paid',side:'Groom'},
+      {id:uid(),category:'Entertainment',item:'Sangeet DJ & dhol',vendor:'Beat Baraat',estimated:180000,actual:0,paid:50000,due:'2026-12-05',status:'Advance paid',side:'Groom'}
+    ],
+    vendors:[
+      {id:uid(),name:'Petals & Pearls',service:'Decorator',contact:'Ritika',phone:'98290 10101',amount:850000,advance:300000,side:'Bride'},
+      {id:uid(),name:'Royal Rasoi',service:'Caterer',contact:'Mahesh ji',phone:'98290 20202',amount:1200000,advance:200000,side:'Shared'},
+      {id:uid(),name:'Frames by Kabir',service:'Photographer',contact:'Kabir',phone:'98100 30303',amount:450000,advance:450000,side:'Groom'}
+    ],
+    shagun:[
+      {id:uid(),from:'Sharma Family',side:'Bride',relation:'Mama ji',type:'Cash envelope',amount:51000,event:'Wedding',receivedBy:'Papa',envelopeNo:'B-001',returnGift:'Pending'},
+      {id:uid(),from:'Verma Family',side:'Groom',relation:'Bua ji',type:'Jewellery',amount:0,gift:'Gold bangles',event:'Wedding',receivedBy:'Mummy',envelopeNo:'G-001',returnGift:'Given'}
+    ],
+    tasks:[
+      {id:uid(),task:'Collect ID proofs from all outstation guests',assignee:'Neha',side:'Shared',due:'2026-12-01',priority:'High',status:'In progress'},
+      {id:uid(),task:'Finalise Sangeet performance list',assignee:'Karan',side:'Groom',due:'2026-11-25',priority:'Medium',status:'To do'},
+      {id:uid(),task:'Pack welcome hampers',assignee:'Mummy',side:'Bride',due:'2026-12-08',priority:'Medium',status:'To do'}
+    ],
+    pending:[
+      {id:uid(),name:'Tanvi Joshi',side:'Bride',relation:'School friend',phone:'98765 43210',city:'Pune',adults:1,kids:0,arrMode:'Air',arrDate:'2026-12-11T12:30',arrRef:'6E 341',arrPoint:'Udaipur Airport',pickup:'Yes',diet:'Veg',events:['Sangeet','Wedding'],submittedAt:new Date().toISOString()},
+      {id:uid(),name:'Kabir Malhotra',side:'Groom',relation:'Office colleague',phone:'98111 45678',city:'Gurugram',adults:2,kids:0,arrMode:'Car',arrDate:'2026-12-11T16:00',pickup:'No',diet:'Non-Veg',events:['Sangeet','Wedding','Reception'],submittedAt:new Date().toISOString()}
+    ]
+  };
+}
+function normalise(d){
+  const out = Object.assign(seed(), d);
+  out.settings = Object.assign(clone(COUPLE_DEFAULTS), d.settings||{});
+  out.settings.access = {};
+  SIDE2.forEach(s=>{ out.settings.access[s] = Object.assign(clone(COUPLE_DEFAULTS.access[s]), (d.settings&&d.settings.access&&d.settings.access[s])||{}); });
+  return out;
+}
+function load(){
+  try{ const raw = localStorage.getItem(STORE_KEY); if(raw) return normalise(JSON.parse(raw)); }catch(e){}
+  return seed();
+}
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){ toast('Could not save on this device — storage is full or blocked'); }
+}
+let S = load();
+let role = null, view = 'dash';
+const ui = { pinFor:null, owner:false, unlocked:[], gRsvp:'All', travelTab:'arr', travelMode:'All', travelWho:'mine', portalDone:false };
+function saveSession(){ try{ sessionStorage.setItem(STORE_KEY+'_s', JSON.stringify({role, owner:ui.owner, unlocked:ui.unlocked})); }catch(e){} }
+try{ const ss = JSON.parse(sessionStorage.getItem(STORE_KEY+'_s')||'null'); if(ss && ['bride','groom','guest'].includes(ss.role)){ role=ss.role; ui.owner=!!ss.owner; ui.unlocked=ss.unlocked||[]; } }catch(e){}
+if(location.hash==='#guest') role='guest';
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slug = v => String(v).toLowerCase().replace(/[^a-z0-9]+/g,'-');
+const inr = n => '₹' + (Number(n)||0).toLocaleString('en-IN');
+const num = v => Number(v)||0;
+const pax = arr => arr.reduce((s,g)=>s+num(g.adults)+num(g.kids),0);
+function fmtDT(v){ if(!v) return ''; const d=new Date(v); return isNaN(d)?esc(v):d.toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}); }
+function fmtD(v){ if(!v) return ''; const d=new Date(v+'T00:00'); return isNaN(d)?esc(v):d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+function fmtT(v){ if(!v) return ''; const [h,m]=v.split(':'); const d=new Date(); d.setHours(+h,+m); return d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}); }
+const modeChip = m => m ? `<span class="mode">${I(MODE_ICON[m]||'local')}${esc(m)}</span>` : '';
+const sideName = s => s==='Bride' ? S.settings.bride : s==='Groom' ? S.settings.groom : 'Both';
+const sideLabel = v => v==='Shared' ? 'Shared' : v ? `${esc(sideName(v))}'s side` : '';
+function fmt(f,v){
+  if(v==null || v==='' || (Array.isArray(v)&&!v.length)) return '<span class="dim">—</span>';
+  switch(f.t){
+    case 'money': return inr(v);
+    case 'datetime-local': return fmtDT(v);
+    case 'date': return fmtD(v);
+    case 'time': return fmtT(v);
+    case 'multi': return v.map(x=>`<span class="tag">${esc(x)}</span>`).join('');
+    case 'textarea': { const s=String(v); return esc(s.length>70?s.slice(0,70)+'…':s); }
+    case 'select':
+      if(f.k==='side') return `<span class="badge b-${slug(v)}">${sideLabel(v)}</span>`;
+      if(f.badge) return `<span class="badge b-${slug(v)}">${esc(v)}</span>`;
+      if(f.o===MODES) return modeChip(v);
+      return esc(v);
+  }
+  return esc(v);
+}
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),3000); }
+function daysLeft(){ const d=new Date(S.settings.date+'T00:00'); const t=new Date(); t.setHours(0,0,0,0); return Math.round((d-t)/864e5); }
+const initials = () => `${esc((S.settings.bride||'A')[0])}<b>&amp;</b>${esc((S.settings.groom||'R')[0])}`;
+const coupleName = () => `${esc(S.settings.bride)} &amp; ${esc(S.settings.groom)}`;
+const bg = url => url ? `style="background-image:url('${esc(url)}')"` : '';
+function waLink(phone,msg){ let d=String(phone||'').replace(/\D/g,''); if(d.length===10) d='91'+d; return d ? `https://wa.me/${d}?text=${encodeURIComponent(msg)}` : ''; }
+function waMsg(g){
+  const s=S.settings; let m=`Namaste ${g.name}! 🌸\nWe are so happy you are joining ${s.bride} & ${s.groom}'s wedding.`;
+  if(g.arrDate) m+=`\n\nArrival: ${fmtDT(g.arrDate)}${g.arrRef?' · '+g.arrRef:''}${g.arrPoint?' at '+g.arrPoint:''}`;
+  if(g.driver) m+=`\nPickup: ${g.driver}${g.driverPhone?' ('+g.driverPhone+')':''}${g.carNo?' · '+g.carNo:''}`;
+  if(g.hotel) m+=`\nStay: ${g.hotel}${g.room?', Room '+g.room:''}`;
+  return m+`\n\nSee you soon!\n— ${sideName(g.side)}'s family`;
+}
+const guestLink = () => location.href.split('#')[0] + '#guest';
+
+/* =========================================================
+   ACCESS — each side is its own owner
+   ========================================================= */
+const side = () => role==='bride' ? 'Bride' : role==='groom' ? 'Groom' : null;
+const other = () => side()==='Bride' ? 'Groom' : 'Bride';
+const acc = (s=side()) => S.settings.access[s];
+function lockOf(v){ if(v==='dash') return 'open'; if(v==='settings') return 'owner'; return (acc().locks||{})[v] || 'open'; }
+function canOpen(v){ if(!side()) return v==='portal'; if(ui.owner) return true; const l=lockOf(v); return l==='open' || ui.unlocked.includes(v); }
+function navVisible(v){ if(!side()) return false; return ui.owner || lockOf(v)!=='hidden'; }
+function canEdit(mod){ if(!side()) return false; return canOpen(VIEW_OF[mod]) || (mod==='guests' && canOpen('travel')); }
+const ownRow = r => !r.side || r.side==='Shared' || r.side===side();
+function rows(mod){
+  const s=side(), r=S[mod]||[];
+  if(!s) return r;
+  if(mod==='guests'||mod==='shagun'||mod==='pending') return r.filter(x=>x.side===s);
+  if(mod==='events') return r;
+  return r.filter(ownRow);
+}
+function visibleGuests(){ const s=side(), o=other(); return S.guests.filter(g=>g.side===s || (g.side===o && acc(o).share)); }
+
+/* =========================================================
+   LANDING
+   ========================================================= */
+function landingView(){
+  const s=S.settings;
+  const arch = (r,sd) => `<button class="arch ${ui.pinFor===r?'on':''}" data-role="${r}"><span class="script">${sd==='Bride'?"Bride's":"Groom's"}</span><strong>${esc(sideName(sd))}'s Side</strong><small>Family &amp; owner access</small></button>`;
+  return `<section class="landing ${s.heroImg?'has-img':''}" ${bg(s.heroImg)}>
+    <div class="corner tl">${FLORAL}</div><div class="corner br">${FLORAL}</div>
+    <div class="land">
+      <div class="kicker">The Wedding Manager of</div>
+      <div class="mono">${initials()}</div>
+      <h1>${coupleName()}</h1>
+      <div class="meta">${fmtD(s.date)} · ${esc(s.venue)}</div>
+      <div class="orn"><span></span><i></i><span></span></div>
+      <div class="cd" id="cd"></div>
+      <div class="sides">${arch('bride','Bride')}${arch('groom','Groom')}</div>
+      ${ui.pinFor?`<div class="pinbox"><form data-form="pin"><input class="in" id="pinIn" type="password" inputmode="numeric" placeholder="Enter your PIN" autocomplete="off" required><button class="btn pri" type="submit">Enter</button></form>
+        <p>Family PIN opens the shared sections · Owner PIN unlocks everything</p></div>`:''}
+      <div><button class="guestbtn" data-role="guest">🎉 I'm a guest — open the invitation</button></div>
+      <div class="brandline">Crafted with love by <a href="${BRAND.url}" target="_blank" rel="noopener">${BRAND.name}</a></div>
+    </div>
+  </section>`;
+}
+function tick(){
+  const el=$('#cd'); if(!el) return;
+  const t=new Date(`${S.settings.date}T${S.settings.time||'00:00'}`), diff=t-new Date();
+  if(isNaN(t)){ el.innerHTML=''; return; }
+  if(diff<=0){ el.innerHTML='<span class="script" style="font-size:34px;color:var(--rose)">Happily married</span>'; return; }
+  const d=Math.floor(diff/864e5), h=Math.floor(diff/36e5)%24, m=Math.floor(diff/6e4)%60, sec=Math.floor(diff/1e3)%60;
+  el.innerHTML=[[d,'Days'],[h,'Hours'],[m,'Mins'],[sec,'Secs']].map(([v,l])=>`<div><strong>${String(v).padStart(2,'0')}</strong><small>${l}</small></div>`).join('');
+}
+setInterval(tick,1000);
+
+/* =========================================================
+   SHELL
+   ========================================================= */
+function shell(content){
+  const items = NAV.filter(n=>navVisible(n[0]));
+  return `<div class="shell">
+    <aside class="side">
+      <div class="top"><div class="mono sm-mono">${initials()}</div><button class="ic mob-out" data-act="logout" title="Sign out">${I('out')}</button></div>
+      <div class="sm-meta">${fmtD(S.settings.date)}</div>
+      <nav class="nav">${items.map(n=>`<button data-nav="${n[0]}" class="${view===n[0]?'on':''}">${I(n[2])}<span>${n[1]}</span>${canOpen(n[0])?'':`<svg class="i lk" viewBox="0 0 24 24"><path d="${P.lock}"/></svg>`}</button>`).join('')}</nav>
+      <div class="who"><div class="row"><span>Signed in as<br><strong>${esc(sideName(side()))}'s Side</strong> · ${ui.owner?'Owner':'Family'}</span><button class="ic" data-act="logout" title="Sign out">${I('out')}</button></div>
+        ${ui.owner?'':`<button class="btn sm" data-act="ownerUnlock">${I('key')}Owner login</button>`}</div>
+      <div class="credit">Crafted by <a href="${BRAND.url}" target="_blank" rel="noopener">${BRAND.name}</a></div>
+    </aside>
+    <main class="main">${content}</main>
+  </div>`;
+}
+const head = (title,sub,acts='') => `<div class="ph"><div><h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div><div class="acts">${acts}</div></div>`;
+const kpi = (icon,lbl,val,sub='',cls='') => `<div class="kpi ${cls}"><div class="lbl">${I(icon)}${lbl}</div><div class="val">${val}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`;
+
+function toolbar(mod,{add=true}={}){
+  const e = canEdit(mod);
+  return `<div class="toolbar">
+    <div class="search">${I('search')}<input class="in" data-search placeholder="Search…"></div>
+    ${e&&add?`<button class="btn pri" data-act="add" data-mod="${mod}">${I('plus')}Add ${MODS[mod].title.toLowerCase()}</button>`:''}
+    ${e?`<button class="btn" data-act="import" data-mod="${mod}" title="Import from Excel">${I('up')}Import</button>`:''}
+    <button class="btn" data-act="export" data-mod="${mod}" title="Download as Excel">${I('down')}Excel</button>
+    ${e?`<button class="btn ghost" data-act="template" data-mod="${mod}" title="Blank Excel template">${I('file')}Template</button>`:''}
+  </div>`;
+}
+function table(mod, data){
+  const cols = MODS[mod].fields.filter(f=>f.list);
+  const e = canEdit(mod);
+  const acts = r => {
+    let h='';
+    if(mod==='guests' && r.phone){ const l=waLink(r.phone,waMsg(r)); if(l) h+=`<a class="ic wa" href="${l}" target="_blank" rel="noopener" title="Send details on WhatsApp">${I('wa')}</a>`; }
+    if(e && ownRow(r)) h+=`<button class="ic" data-act="edit" data-mod="${mod}" data-id="${r.id}" title="Edit">${I('edit')}</button><button class="ic" data-act="del" data-mod="${mod}" data-id="${r.id}" title="Delete">${I('trash')}</button>`;
+    return h;
+  };
+  const body = data.length ? data.map(r=>`<tr>${cols.map(c=>`<td>${fmt(c,r[c.k])}</td>`).join('')}<td class="act">${acts(r)}</td></tr>`).join('')
+    : `<tr><td colspan="${cols.length+1}" class="empty">Nothing here yet${e?' — add your first entry or import from Excel.':'.'}</td></tr>`;
+  return `<div class="tablewrap"><table><thead><tr>${cols.map(c=>`<th>${c.l}</th>`).join('')}<th></th></tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+/* =========================================================
+   VIEWS
+   ========================================================= */
+function dashView(){
+  const s=S.settings, a=acc(), G=rows('guests'), conf=G.filter(g=>g.rsvp==='Confirmed'), d=daysLeft();
+  const modes = MODES.map(m=>[m,G.filter(g=>g.arrMode===m&&g.rsvp!=='Declined').length]).filter(x=>x[1]);
+  const noPick = G.filter(g=>g.pickup==='Yes'&&g.rsvp!=='Declined'&&!g.driver).length;
+  const noTravel = conf.filter(g=>!g.arrMode).length;
+  const B=rows('budget'), act=B.reduce((x,b)=>x+num(b.actual||b.estimated),0), paid=B.reduce((x,b)=>x+num(b.paid),0);
+  const SH=rows('shagun'), sh=SH.reduce((x,b)=>x+num(b.amount),0);
+  const T=rows('tasks'), openT=T.filter(t=>t.status!=='Done').length;
+  const now=Date.now();
+  const upcoming = G.filter(g=>g.arrDate && g.rsvp!=='Declined').sort((x,y)=>new Date(x.arrDate)-new Date(y.arrDate)).filter(g=>new Date(g.arrDate)>=now-864e5).slice(0,6);
+  const evs=[...S.events].sort((x,y)=>(x.date+x.time).localeCompare(y.date+y.time));
+  const pend=rows('pending').length;
+  const R=rows('rooms');
+  return `<div class="banner" ${bg(s.heroImg)}><div class="bfl">${FLORAL}</div><div class="bwrap">
+      <div><div class="kicker" style="color:rgba(255,255,255,.85)">${esc(s.hashtag||'')}</div><h2>${coupleName()}</h2><div class="bmeta">${fmtD(s.date)} · ${esc(s.venue)}</div></div>
+      ${d>=0?`<div class="days"><strong>${d}</strong><small>days to go</small></div>`:''}
+    </div></div>
+    ${head(`Welcome, ${esc(sideName(side()))}'s family`, `${ui.owner?`<span class="role-pill">${I('key')}Owner</span> `:''}Everything for your side of the celebration, at a glance.`, pend&&canOpen('guests')?`<button class="btn gold" data-nav="guests">${pend} new guest ${pend>1?'replies':'reply'} to review</button>`:'')}
+    <div class="grid kpis">
+      ${canOpen('guests')||canOpen('travel')?kpi('guests','Invitations',G.length,`${pax(G.filter(g=>g.rsvp!=='Declined'))} people expected`,'accent')+kpi('check','Confirmed',pax(conf),`${conf.length} families · ${G.filter(g=>g.rsvp==='Pending').length} pending`):''}
+      ${canOpen('travel')?kpi('travel','Need pickup',noPick,noPick?'No driver assigned yet':'All pickups covered')+kpi('file','Travel pending',noTravel,'Confirmed, no travel plan'):''}
+      ${canOpen('rooms')?kpi('rooms','Rooms allotted',`${R.filter(r=>r.guest).length}<span style="font-size:20px;color:var(--muted)">/${R.length}</span>`,'yours + shared'):''}
+      ${canOpen('budget')?kpi('budget','Paid so far',inr(paid),`of ${inr(a.budget)} budget`):''}
+      ${canOpen('shagun')?kpi('shagun','Shagun',inr(sh),`${SH.length} entries`):''}
+      ${canOpen('tasks')?kpi('tasks','Open tasks',openT,'on the checklist'):''}
+    </div>
+    <div class="grid cols">
+      ${canOpen('travel')?`<div class="card"><h3>Arriving next <small>${modes.map(m=>`${m[0]} ${m[1]}`).join(' · ')}</small></h3>
+        <div class="list">${upcoming.length?upcoming.map(g=>`<div class="li"><div class="dot">${I(MODE_ICON[g.arrMode]||'local')}</div><div class="grow"><div class="t">${esc(g.name)} <span class="s">· ${pax([g])} pax</span></div><div class="s">${fmtDT(g.arrDate)} · ${esc(g.arrRef||g.arrMode||'')} ${g.arrPoint?'· '+esc(g.arrPoint):''}</div></div>${g.pickup==='Yes'?(g.driver?`<span class="badge b-set">${esc(g.driver)}</span>`:`<span class="badge b-needed">Assign car</span>`):''}</div>`).join(''):'<div class="empty">No arrivals added yet.</div>'}</div>
+      </div>`:''}
+      <div class="grid" style="gap:14px">
+        <div class="card"><h3>Celebrations</h3><div class="list">${evs.map(e=>`<div class="li"><div class="dot">${I('events')}</div><div class="grow"><div class="t">${esc(e.name)}</div><div class="s">${fmtD(e.date)}${e.time?' · '+fmtT(e.time):''} · ${esc(e.venue||'')}</div></div></div>`).join('')||'<div class="empty">No events yet.</div>'}</div></div>
+        ${canOpen('budget')?`<div class="card"><h3>Budget <small>${inr(act)} committed</small></h3>
+          <div class="note" style="margin-bottom:6px">Committed vs your budget</div><div class="bar"><i style="width:${Math.min(100,act/(num(a.budget)||1)*100)}%"></i></div>
+          <div class="note" style="margin:12px 0 6px">Paid vs committed</div><div class="bar gold"><i style="width:${Math.min(100,paid/(act||1)*100)}%"></i></div>
+          <div class="note" style="margin-top:10px">Balance to pay: <strong style="color:var(--ink)">${inr(act-paid)}</strong></div></div>`:''}
+      </div>
+    </div>`;
+}
+
+function guestsView(){
+  let G=rows('guests'); const all=G;
+  if(ui.gRsvp!=='All') G=G.filter(g=>g.rsvp===ui.gRsvp);
+  const pend=rows('pending');
+  return `${head(`${esc(sideName(side()))}'s Guest List`, `${all.length} invitations · ${pax(all.filter(g=>g.rsvp==='Confirmed'))} confirmed guests`)}
+    ${pend.length?`<div class="card" style="margin-bottom:18px;border-color:#F0D3C0;background:linear-gradient(180deg,#fff,#FFF8F1)"><h3>New from the guest portal <small>${pend.length} to review</small></h3><div class="list">
+      ${pend.map(p=>`<div class="li"><div class="dot">${I('portal')}</div><div class="grow"><div class="t">${esc(p.name)} <span class="s">· ${esc(p.relation||'')} · ${pax([p])} pax</span></div><div class="s">${p.arrMode?esc(p.arrMode)+' · '+fmtDT(p.arrDate)+(p.arrRef?' · '+esc(p.arrRef):''):'No travel details'} ${p.phone?'· '+esc(p.phone):''}</div></div>
+        ${canEdit('guests')?`<button class="btn sm pri" data-act="approve" data-id="${p.id}">${I('check')}Add to list</button><button class="ic" data-act="discard" data-id="${p.id}" title="Discard">${I('x')}</button>`:''}</div>`).join('')}
+    </div></div>`:''}
+    <div class="chips">${['All','Confirmed','Pending','Tentative','Declined'].map(v=>`<button class="chip ${ui.gRsvp===v?'on':''}" data-chip="gRsvp" data-v="${v}">${v==='All'?'All RSVPs':v}</button>`).join('')}</div>
+    ${toolbar('guests')}${table('guests',G)}`;
+}
+
+function travelView(){
+  const arr = ui.travelTab==='arr';
+  const mk=arr?'arrMode':'depMode', dk=arr?'arrDate':'depDate', rk=arr?'arrRef':'depRef', nk=arr?'pickup':'drop';
+  const otherShares = acc(other()).share;
+  const pool = ui.travelWho==='all' && otherShares ? visibleGuests() : rows('guests');
+  let G = pool.filter(g=>g.rsvp!=='Declined' && g[mk]);
+  const counts = MODES.map(m=>[m,G.filter(g=>g[mk]===m)]);
+  if(ui.travelMode!=='All') G=G.filter(g=>g[mk]===ui.travelMode);
+  const groups={};
+  G.sort((x,y)=>new Date(x[dk]||0)-new Date(y[dk]||0)).forEach(g=>{ const k=(g[dk]||'').slice(0,10)||'Date not shared'; (groups[k]=groups[k]||[]).push(g); });
+  const missing = rows('guests').filter(g=>g.rsvp==='Confirmed' && !g[mk]);
+  const card = g => { const mine=g.side===side(), warn=g[nk]==='Yes' && !g.driver; const wl=mine?waLink(g.phone,waMsg(g)):'';
+    return `<div class="tc ${warn?'warn':''}">
+      <div class="flag">${mine?'':`<span class="badge b-${slug(g.side)}">${esc(sideName(g.side))}'s</span>`}${g[nk]==='Yes'?(g.driver?`<span class="badge b-set">${arr?'Pickup':'Drop'} set</span>`:`<span class="badge b-needed">${arr?'Pickup':'Drop'} needed</span>`):`<span class="badge b-own">Own transport</span>`}</div>
+      <div class="time">${g[dk]?new Date(g[dk]).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}):'—'}</div>
+      <div class="nm">${esc(g.name)}</div>
+      <div class="ln">${I(MODE_ICON[g[mk]]||'local')}${esc(g[mk])} ${g[rk]?'· '+esc(g[rk]):''} · ${pax([g])} pax</div>
+      ${arr&&g.arrPoint?`<div class="ln">${I('pin')}${esc(g.arrPoint)}</div>`:''}
+      ${g.driver?`<div class="ln">${I('car')}${esc(g.driver)} · ${esc(g.carNo||'')} ${g.driverPhone?'· '+esc(g.driverPhone):''}</div>`:''}
+      ${g.hotel?`<div class="ln">${I('rooms')}${esc(g.hotel)}${g.room?' · Room '+esc(g.room):''}</div>`:''}
+      ${g.phone?`<div class="ln">${I('phone')}${esc(g.phone)}</div>`:''}
+      ${mine&&(canEdit('guests')||wl)?`<div class="acts">${canEdit('guests')?`<button class="btn sm" data-act="edit" data-mod="guests" data-id="${g.id}">${I('edit')}Update</button>`:''}${wl?`<a class="btn sm wa" href="${wl}" target="_blank" rel="noopener">${I('wa')}WhatsApp</a>`:''}</div>`:''}
+    </div>`; };
+  return `${head('Travel Desk','Who is arriving when, how — and who is picking them up.',`<button class="btn" data-act="exportTravel">${I('down')}Excel</button>`)}
+    <div class="chips">
+      <button class="chip ${arr?'on':''}" data-chip="travelTab" data-v="arr">Arrivals</button>
+      <button class="chip ${!arr?'on':''}" data-chip="travelTab" data-v="dep">Departures</button>
+      ${otherShares?`<span style="width:8px"></span><button class="chip ${ui.travelWho==='mine'?'on':''}" data-chip="travelWho" data-v="mine">Our guests</button><button class="chip ${ui.travelWho==='all'?'on':''}" data-chip="travelWho" data-v="all">Both sides</button>`:''}
+    </div>
+    <div class="chips">
+      <button class="chip ${ui.travelMode==='All'?'on':''}" data-chip="travelMode" data-v="All">All modes</button>
+      ${counts.map(([m,a])=>`<button class="chip ${ui.travelMode===m?'on':''}" data-chip="travelMode" data-v="${m}">${m} · ${pax(a)}</button>`).join('')}
+    </div>
+    ${missing.length?`<div class="card" style="margin-bottom:18px"><h3>Still waiting for travel plans <small>${missing.length} confirmed families</small></h3><div style="display:flex;flex-wrap:wrap;gap:6px">${missing.map(g=>`<span class="tag">${esc(g.name)}${g.phone?' · '+esc(g.phone):''}</span>`).join('')}</div></div>`:''}
+    ${Object.keys(groups).length?Object.entries(groups).map(([k,list])=>`<div class="day"><h4>${k.length===10?new Date(k+'T00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'}):k} <span>${list.length} ${list.length>1?'parties':'party'} · ${pax(list)} guests</span></h4><div class="tcards">${list.map(card).join('')}</div></div>`).join('')
+      :'<div class="card empty">No travel details yet. Guests can add theirs from the Guest Portal.</div>'}`;
+}
+
+function roomsView(){
+  const R=rows('rooms'), alloc=R.filter(r=>r.guest).length, beds=R.reduce((x,b)=>x+num(b.capacity),0);
+  const hotels=[...new Set(R.map(r=>r.hotel).filter(Boolean))];
+  const unhoused=rows('guests').filter(g=>g.rsvp==='Confirmed' && !g.room && g.pickup!=='No').length;
+  return `${head('Stay & Rooms','Your rooms and shared rooms. Allotting a guest here updates their hotel & room automatically.')}
+    <div class="grid kpis">${kpi('rooms','Rooms',R.length,`${hotels.length} ${hotels.length===1?'property':'properties'}`,'accent')}${kpi('check','Allotted',alloc,`${R.length-alloc} available`)}${kpi('guests','Bed capacity',beds,'total across rooms')}${kpi('file','Guests without room',unhoused,'confirmed outstation guests')}</div>
+    ${toolbar('rooms')}${table('rooms',R)}`;
+}
+function fleetView(){
+  const F=rows('fleet');
+  return `${head('Transport','Cars, drivers and duties. Assigning a guest here shares the driver and car details with them.')}
+    <div class="grid kpis">${kpi('fleet','Vehicles',F.length,`${F.reduce((x,b)=>x+num(b.seats),0)} seats`,'accent')}${kpi('check','On duty',F.filter(f=>f.status==='On duty').length,'right now')}${kpi('travel','Pickups pending',rows('guests').filter(g=>g.pickup==='Yes'&&g.rsvp!=='Declined'&&!g.driver).length,'your guests without a driver')}</div>
+    ${toolbar('fleet')}${table('fleet',F)}`;
+}
+function eventsView(){
+  const evs=[...S.events].sort((x,y)=>(x.date+x.time).localeCompare(y.date+y.time));
+  const G=S.guests.filter(g=>g.rsvp==='Confirmed');
+  const count = e => pax(G.filter(g=>!g.events||!g.events.length||g.events.includes(e.name)));
+  return `${head('Events','Shared by both families — the full celebration, function by function.')}
+    <div class="evs">${evs.map(e=>`<div class="ev"><div class="d">${fmtD(e.date)}${e.time?' · '+fmtT(e.time):''}</div><h5>${esc(e.name)}</h5>
+      <div class="ln">${esc(e.venue||'')}</div>${e.dressCode?`<div class="ln">Dress code · ${esc(e.dressCode)}</div>`:''}${e.theme?`<div class="ln">Theme · ${esc(e.theme)}</div>`:''}
+      <div class="ln" style="margin-top:10px;color:var(--wine)">${count(e)} guests expected (both sides)</div></div>`).join('')}</div>
+    ${toolbar('events')}${table('events',evs)}`;
+}
+function cateringView(){
+  const G=S.guests.filter(g=>g.rsvp==='Confirmed');
+  const evs=[...S.events].sort((x,y)=>(x.date+x.time).localeCompare(y.date+y.time));
+  const M=rows('menu'), cost=M.reduce((x,m)=>x+num(m.plates)*num(m.costPlate),0);
+  const card = e => { const att=G.filter(g=>!g.events||!g.events.length||g.events.includes(e.name));
+    const by = d => pax(att.filter(g=>(g.diet||'Veg')===d));
+    const kids=att.reduce((x,g)=>x+num(g.kids),0);
+    const plates=M.filter(m=>m.event===e.name).reduce((x,m)=>x+num(m.plates),0);
+    return `<div class="ev"><div class="d">${fmtD(e.date)}</div><h5>${esc(e.name)}</h5>
+      <div class="ln" style="font-size:24px;font-family:var(--serif);color:var(--ink)">${pax(att)} <span style="font-size:13px;font-family:var(--sans);color:var(--muted)">guests (${kids} kids)</span></div>
+      <div class="ln">Veg ${by('Veg')} · Jain ${by('Jain')} · Non-veg ${by('Non-Veg')} · Vegan ${by('Vegan')}</div>
+      <div class="ln">${plates?`${plates} plates ordered`:'No menu added yet'}</div></div>`; };
+  return `${head('Catering','Live headcounts from confirmed RSVPs on both sides, by food preference.',`<span class="badge" style="padding:8px 14px">Menus total ${inr(cost)}</span>`)}
+    <div class="evs">${evs.map(card).join('')}</div>
+    <h3 class="serif" style="font-size:26px;font-weight:500;margin:6px 0 12px;color:var(--wine)">Menus</h3>
+    ${toolbar('menu')}${table('menu',M)}`;
+}
+function budgetView(){
+  const B=rows('budget'), a=acc();
+  const act=B.reduce((x,b)=>x+num(b.actual||b.estimated),0), paid=B.reduce((x,b)=>x+num(b.paid),0);
+  const cats={}; B.forEach(b=>{ cats[b.category]=(cats[b.category]||0)+num(b.actual||b.estimated); });
+  const max=Math.max(1,...Object.values(cats));
+  const due=B.filter(b=>b.due && b.status!=='Fully paid').sort((x,y)=>x.due.localeCompare(y.due)).slice(0,5);
+  return `${head(`${esc(sideName(side()))}'s Budget`,'Your side’s expenses plus anything marked shared. The other family never sees this.')}
+    <div class="grid kpis">${kpi('budget','Your budget',inr(a.budget),'change in Settings','accent')}${kpi('file','Committed',inr(act),`${Math.round(act/(num(a.budget)||1)*100)}% of budget`)}${kpi('check','Paid',inr(paid),`${Math.round(paid/(act||1)*100)}% of committed`)}${kpi('clock','Balance due',inr(act-paid),'to vendors')}${kpi('dash','Remaining',inr(num(a.budget)-act),'uncommitted')}</div>
+    <div class="grid cols" style="margin-bottom:22px">
+      <div class="card"><h3>By category</h3>${Object.entries(cats).sort((x,y)=>y[1]-x[1]).map(([c,v])=>`<div style="margin:10px 0"><div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px"><span>${esc(c)}</span><span>${inr(v)}</span></div><div class="bar"><i style="width:${v/max*100}%"></i></div></div>`).join('')||'<div class="empty">No expenses yet.</div>'}</div>
+      <div class="card"><h3>Upcoming payments</h3><div class="list">${due.map(b=>`<div class="li"><div class="dot">${I('clock')}</div><div class="grow"><div class="t">${esc(b.item)}</div><div class="s">${esc(b.vendor||'')} · due ${fmtD(b.due)}</div></div><strong>${inr(num(b.actual||b.estimated)-num(b.paid))}</strong></div>`).join('')||'<div class="empty">Nothing due.</div>'}</div></div>
+    </div>
+    ${toolbar('budget')}${table('budget',B)}`;
+}
+function vendorsView(){ return `${head('Vendors','Your vendors plus shared ones — contacts and payments in one place.')}${toolbar('vendors')}${table('vendors',rows('vendors'))}`; }
+function shagunView(){
+  const R=rows('shagun'), tot=R.reduce((x,b)=>x+num(b.amount),0);
+  return `${head('Shagun Register','A private record of blessings received — envelopes, UPI, gifts and return gifts.')}
+    <div class="grid kpis">${kpi('shagun','Total received',inr(tot),`${R.length} entries`,'accent')}${kpi('file','Cash & UPI',inr(R.filter(r=>['Cash envelope','UPI','Cheque'].includes(r.type)).reduce((x,b)=>x+num(b.amount),0)),'envelopes, UPI, cheques')}${kpi('check','Return gifts pending',R.filter(r=>r.returnGift!=='Given').length,'to be given')}</div>
+    ${toolbar('shagun')}${table('shagun',R)}`;
+}
+function tasksView(){
+  const T=rows('tasks'), done=T.filter(t=>t.status==='Done').length;
+  return `${head('Checklist',`${done} of ${T.length} done`)}
+    <div class="card" style="margin-bottom:18px"><div class="bar"><i style="width:${T.length?done/T.length*100:0}%"></i></div></div>
+    ${toolbar('tasks')}${table('tasks',T)}`;
+}
+
+/* ---------- guest portal ---------- */
+function portalView(){
+  const s=S.settings, evs=[...S.events].sort((x,y)=>(x.date+x.time).localeCompare(y.date+y.time)), d=daysLeft();
+  const isGuest = role==='guest';
+  const petals = Array.from({length:12},(_,i)=>`<i class="petal" style="left:${(i*8.3+3)%100}%;animation-duration:${7+(i%5)*1.6}s;animation-delay:${-(i*1.3)}s"></i>`).join('');
+  const cover = `<div class="pcover ${(s.portalImg||s.heroImg)?'has-img':''}" ${bg(s.portalImg||s.heroImg)}>
+      <div class="toran"></div>${petals}<div class="pfl l">${FLORAL}</div><div class="pfl r">${FLORAL}</div>
+      <div><div class="script">You're invited</div><div class="mono">${initials()}</div><h2>${coupleName()}</h2>
+      <p>${fmtD(s.date)} · ${esc(s.venue)}</p>${d>=0?`<span class="pdays">${d} days to go</span>`:''}</div></div>`;
+  const credit = `<div class="brandline" style="text-align:center;margin:22px 0 10px">Crafted with love by <a href="${BRAND.url}" target="_blank" rel="noopener">${BRAND.name}</a></div>`;
+  if(isGuest && ui.portalDone) return `<div class="portal">${cover}<div class="card wcard thanks"><div class="script">Thank you!</div><div class="orn"><span></span><i></i><span></span></div><p>Your details have reached the family. We can't wait to celebrate with you!</p><button class="btn" data-act="portalAgain" style="margin-top:16px">Add another family</button></div>${credit}</div>`;
+  const flds = PORTAL_FIELDS.map(k=>MODS.guests.fields.find(f=>f.k===k));
+  return `<div class="portal">
+    ${isGuest?'':head('Guest Portal','This is exactly what guests see. Share the invitation link — replies land in your Guest List for review.',`<button class="btn" data-act="copyLink">${I('link')}Copy guest link</button>`)}
+    ${cover}
+    <div class="card wcard"><div class="script">Dear family &amp; friends</div><p>${esc(s.welcome||'')}</p></div>
+    <div class="ptitle"><span class="script">the</span><h3>Celebrations</h3></div>
+    <div class="evs">${evs.map(e=>`<div class="ev"><div class="d">${fmtD(e.date)}${e.time?' · '+fmtT(e.time):''}</div><h5>${esc(e.name)}</h5><div class="ln">${esc(e.venue||'')}</div>${e.dressCode?`<div class="ln">Dress code · ${esc(e.dressCode)}</div>`:''}</div>`).join('')}</div>
+    <div class="ptitle"><span class="script">kindly</span><h3>Share your travel plans</h3></div>
+    <form data-form="portal" class="card pform" style="padding:24px">${fieldsHTML(flds,{},{portal:true})}
+      <div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="btn pri" type="submit">${I('check')}Send my details</button></div></form>
+    ${isGuest?`<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" data-act="logout">${I('key')}Family login</button></div>`:''}
+    ${credit}
+  </div>`;
+}
+
+/* ---------- settings (owner only) ---------- */
+function settingsView(){
+  const s=S.settings, sd=side(), a=acc();
+  const imgRow = (k,label) => { const v=s[k]||'', up=v.startsWith('data:');
+    return `<label class="f wide">${label}<div style="display:flex;gap:8px;flex-wrap:wrap"><input class="in" style="flex:1;min-width:220px" name="${k}" value="${up?'':esc(v)}" placeholder="${up?'Uploaded photo in use':'Paste image URL'}"><button type="button" class="btn" data-act="upimg" data-k="${k}">${I('img')}Upload</button>${v?`<button type="button" class="btn danger" data-act="clrimg" data-k="${k}">Remove</button>`:''}</div>${v?`<div style="height:90px;border-radius:12px;margin-top:6px;background:center/cover url('${esc(v)}')"></div>`:''}</label>`; };
+  const lockRow = ([id,name,ic]) => { const m=(a.locks||{})[id]||'open';
+    return `<div class="nm">${I(ic)}${name}</div><select class="in" name="lock_${id}">${LOCK_MODES.map(([v,l])=>`<option value="${v}" ${v===m?'selected':''}>${l}</option>`).join('')}</select><input class="in" name="pin_${id}" value="${esc((a.pins||{})[id]||'')}" placeholder="Section password">`; };
+  return `${head('Settings',`Only ${esc(sideName(sd))}'s side owner can open this page.`)}
+    <form data-form="settings">
+      <div class="card" style="padding:24px;margin-bottom:18px">
+        <h3>${I('lock')} ${esc(sideName(sd))}'s side — access &amp; passwords</h3>
+        <p class="note" style="margin-top:-4px">Share the <strong>Family PIN</strong> with relatives who are helping you. Keep the <strong>Owner PIN</strong> to yourself — it opens every section and this page. The other family has its own PINs and never sees your guest list, budget or shagun.</p>
+        <div class="fgrid">
+          <label class="f">Family PIN<input class="in" name="fam_pin" value="${esc(a.family)}" required></label>
+          <label class="f">Owner PIN<input class="in" name="own_pin" value="${esc(a.owner)}" required></label>
+          <label class="f">Your total budget (₹)<input class="in" type="number" name="side_budget" value="${esc(a.budget)}"></label>
+          <label class="f" style="justify-content:flex-end"><span class="tog"><input type="checkbox" name="share" ${a.share?'checked':''}>Let ${esc(sideName(other()))}'s side see our guests' travel plans (for shared pickups)</span></label>
+        </div>
+        <div class="sec">Section access for family</div>
+        <div class="locks"><div class="h">Section</div><div class="h">Who can open it</div><div class="h">Password (for “Own password”)</div>
+          ${SECTIONS.map(lockRow).join('')}
+        </div>
+        <p class="note">Owner only = family sees a lock and needs your Owner PIN. Hidden = not shown to family at all.</p>
+      </div>
+      <div class="card" style="padding:24px;margin-bottom:18px">
+        <h3>The couple <small>shared with both families</small></h3>
+        <div class="fgrid">
+          <label class="f">Bride<input class="in" name="bride" value="${esc(s.bride)}"></label>
+          <label class="f">Groom<input class="in" name="groom" value="${esc(s.groom)}"></label>
+          <label class="f">Wedding date<input class="in" type="date" name="date" value="${esc(s.date)}"></label>
+          <label class="f">Muhurat / ceremony time<input class="in" type="time" name="time" value="${esc(s.time||'')}"></label>
+          <label class="f">Venue / Destination<input class="in" name="venue" value="${esc(s.venue)}"></label>
+          <label class="f">Hashtag<input class="in" name="hashtag" value="${esc(s.hashtag||'')}"></label>
+          <label class="f wide">Welcome note for guests<textarea class="in" name="welcome">${esc(s.welcome||'')}</textarea></label>
+        </div>
+        <div class="sec">Photos</div>
+        <div class="fgrid">${imgRow('heroImg','Main cover photo (start page & overview)')}${imgRow('portalImg','Guest invitation cover (optional)')}</div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="btn pri" type="submit">${I('check')}Save settings</button></div>
+    </form>
+    <div class="card" style="margin-bottom:18px"><h3>${I('link')} Guest invitation link</h3>
+      <p class="note" style="margin-top:-4px">Send this to guests on WhatsApp — it opens straight into the invitation and travel form.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><input class="in" style="flex:1;min-width:220px" readonly value="${esc(guestLink())}"><button class="btn pri" data-act="copyLink">${I('link')}Copy link</button></div></div>
+    <div class="card"><h3>Data &amp; backup</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" data-act="exportAll">${I('down')}Your Excel workbook</button>
+        <button class="btn" data-act="backup">${I('down')}Backup file (.json)</button>
+        <button class="btn" data-act="restore">${I('up')}Restore backup</button>
+        <button class="btn" data-act="sample">Load sample data</button>
+        <button class="btn danger" data-act="wipe">Start fresh (clear all)</button>
+      </div></div>`;
+}
+
+/* =========================================================
+   FORM BUILDER
+   ========================================================= */
+function fieldInput(f, v, opts){
+  const req = f.req ? 'required' : '';
+  const ph = f.ph ? `placeholder="${esc(f.ph)}"` : '';
+  if(f.k==='side'){
+    if(opts.portal) return `<select class="in" name="side" required><option value="">—</option>${SIDE2.map(o=>`<option value="${o}">Guest of ${esc(sideName(o))}'s family</option>`).join('')}</select>`;
+    if(f.o===SIDE2) return `<select class="in" name="side" disabled><option>${esc(sideName(v||side()))}'s side</option></select>`;
+    return `<select class="in" name="side">${['Shared',side()].map(o=>`<option value="${o}" ${o===v?'selected':''}>${o==='Shared'?'Shared by both families':esc(sideName(o))+"'s side only"}</option>`).join('')}</select>`;
+  }
+  const val = v==null ? '' : v;
+  switch(f.t){
+    case 'select': return `<select class="in" name="${f.k}" ${req}><option value="">—</option>${f.o.map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+    case 'ref': { const list=(f.src==='guests'?visibleGuests():(S[f.src]||[])).map(x=>x.name).filter(Boolean); return `<select class="in" name="${f.k}" ${req}><option value="">—</option>${list.map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`; }
+    case 'multi': { const list=(S[f.src]||[]).map(x=>x.name); const arr=Array.isArray(val)?val:[]; return `<div class="checks">${list.map(o=>`<label><input type="checkbox" name="${f.k}" value="${esc(o)}" ${arr.includes(o)?'checked':''}>${esc(o)}</label>`).join('')||'<span class="dim">Add events first</span>'}</div>`; }
+    case 'textarea': return `<textarea class="in" name="${f.k}" ${ph}>${esc(val)}</textarea>`;
+    case 'money': return `<input class="in" type="number" min="0" step="1" name="${f.k}" value="${esc(val)}" ${ph}>`;
+    case 'number': return `<input class="in" type="number" min="0" name="${f.k}" value="${esc(val)}" ${req}>`;
+    default: return `<input class="in" type="${f.t}" name="${f.k}" value="${esc(val)}" ${req} ${ph}>`;
+  }
+}
+function fieldsHTML(fields, rec, opts={}){
+  let html='', open=false;
+  fields.forEach(f=>{
+    if(f.sec){ if(open) html+='</div>'; html+=`<div class="sec">${opts.portal&&f.sec==='Guest details'?'About you':f.sec}</div><div class="fgrid">`; open=true; }
+    if(!open){ html+='<div class="fgrid">'; open=true; }
+    const label = opts.portal&&f.k==='side' ? 'You are invited by *' : f.l+(f.req?' *':'');
+    html += `<label class="f ${f.wide||f.t==='multi'?'wide':''}">${label}${fieldInput(f, rec[f.k], opts)}</label>`;
+  });
+  if(open) html+='</div>';
+  return html;
+}
+function collect(form, fields){
+  const o={};
+  fields.forEach(f=>{
+    if(f.t==='multi'){ o[f.k]=[...form.querySelectorAll(`input[name="${f.k}"]:checked`)].map(i=>i.value); return; }
+    const el=form.elements[f.k]; if(!el || el.disabled) return;
+    let v=el.value.trim();
+    if((f.t==='number'||f.t==='money') && v!=='') v=Number(v);
+    o[f.k]=v;
+  });
+  return o;
+}
+function defaultSide(mod){ return ['budget','vendors','tasks'].includes(mod) ? side() : 'Shared'; }
+function openForm(mod,id){
+  const sch=MODS[mod], rec = id ? (S[mod].find(x=>x.id===id)||{}) : {side: mod==='guests'||mod==='shagun' ? side() : defaultSide(mod)};
+  $('#modal').innerHTML = `<form class="panel" data-form="crud" data-mod="${mod}" data-id="${id||''}">
+    <header><h3>${id?'Edit':'Add'} ${sch.title.toLowerCase()}</h3><button type="button" class="ic" data-act="close">${I('x')}</button></header>
+    <div class="body">${fieldsHTML(sch.fields, rec)}</div>
+    <footer>${id?`<button type="button" class="btn danger" data-act="del" data-mod="${mod}" data-id="${id}" style="margin-right:auto">${I('trash')}Delete</button>`:''}<button type="button" class="btn" data-act="close">Cancel</button><button class="btn pri" type="submit">${I('check')}Save</button></footer>
+  </form>`;
+  $('#modal').classList.remove('hidden');
+  const first=$('#modal input:not([disabled]),#modal select:not([disabled])'); if(first) first.focus();
+}
+function openUnlock(sec){
+  const mode=lockOf(sec==='owner'?'settings':sec), name=(NAV.find(n=>n[0]===sec)||[])[1]||'This section';
+  const msg = sec==='owner' ? `Enter ${esc(sideName(side()))}'s side Owner PIN to unlock every section and Settings.`
+    : mode==='pin' ? `${esc(name)} has its own password. Enter it — or the Owner PIN.`
+    : `${esc(name)} is for the owner only. Enter the Owner PIN to open it.`;
+  $('#modal').innerHTML = `<form class="panel sm" data-form="unlock" data-sec="${sec}">
+    <header><h3>${I('lock')} ${sec==='owner'?'Owner login':esc(name)}</h3><button type="button" class="ic" data-act="close">${I('x')}</button></header>
+    <div class="body"><p class="note" style="font-size:14px">${msg}</p><input class="in" id="unlockIn" type="password" inputmode="numeric" autocomplete="off" placeholder="Password or PIN" required style="text-align:center;letter-spacing:.3em;margin-bottom:12px"></div>
+    <footer><button type="button" class="btn" data-act="close">Cancel</button><button class="btn pri" type="submit">${I('key')}Unlock</button></footer></form>`;
+  $('#modal').classList.remove('hidden'); setTimeout(()=>{ const i=$('#unlockIn'); if(i) i.focus(); },30);
+}
+function closeModal(){ $('#modal').classList.add('hidden'); $('#modal').innerHTML=''; }
+
+/* keep rooms, transport & events in sync with guest records */
+function syncAfter(mod, rec){
+  if(mod==='rooms' && rec.guest){ const g=S.guests.find(x=>x.name===rec.guest); if(g){ g.hotel=rec.hotel; g.room=rec.roomNo; } if(!rec.status||rec.status==='Available') rec.status='Allocated'; }
+  if(mod==='fleet' && rec.assignedTo){ const g=S.guests.find(x=>x.name===rec.assignedTo); if(g){ g.driver=rec.driver; g.carNo=rec.carNo; g.driverPhone=rec.driverPhone; } }
+  if(mod==='events' && rec._oldName && rec._oldName!==rec.name){ const o=rec._oldName, n=rec.name;
+    S.guests.forEach(g=>{ if(Array.isArray(g.events)) g.events=g.events.map(e=>e===o?n:e); });
+    S.menu.forEach(m=>{ if(m.event===o) m.event=n; }); S.shagun.forEach(m=>{ if(m.event===o) m.event=n; }); }
+  delete rec._oldName;
+}
+
+/* =========================================================
+   CONFETTI — party popper for the guest portal
+   ========================================================= */
+function popConfetti(){
+  try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches) return; }catch(e){}
+  document.querySelectorAll('.confetti,.popper').forEach(n=>n.remove());
+  ['l','r'].forEach(sd=>{ const p=document.createElement('div'); p.className='popper '+sd; p.innerHTML='<span>🎉</span>'; document.body.appendChild(p); setTimeout(()=>p.remove(),1900); });
+  const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
+  const dpr=Math.min(2,window.devicePixelRatio||1), W=innerWidth, H=innerHeight; c.width=W*dpr; c.height=H*dpr;
+  const x=c.getContext('2d'); if(!x){ c.remove(); return; } x.scale(dpr,dpr);
+  const cols=['#F4B6C2','#E8899A','#C2566E','#8E2F44','#D4AF6A','#F3DDA8','#FFFFFF','#F7A8B8'];
+  const ps=[], n=Math.min(240,Math.round(W/4)+90), base=Math.max(14,H*0.021);
+  for(let i=0;i<n;i++){
+    const left=i%2===0, a=(52+Math.random()*30)*Math.PI/180, v=base+Math.random()*base*0.65;
+    ps.push({x:left?24:W-24,y:H-40,vx:(left?1:-1)*Math.cos(a)*v,vy:-Math.sin(a)*v,w:5+Math.random()*7,h:3+Math.random()*5,r:Math.random()*6,vr:(Math.random()-.5)*.35,
+      c:cols[i%cols.length],round:Math.random()<.3,ph:Math.random()*6,delay:Math.floor(Math.random()*10)});
+  }
+  let f=0;
+  (function frame(){
+    f++; x.clearRect(0,0,W,H); let alive=0;
+    ps.forEach(p=>{
+      if(f<p.delay){ alive++; return; }
+      p.vx*=0.985; p.vy=p.vy*0.985+0.32; p.x+=p.vx+(p.vy>0?Math.sin(f*0.08+p.ph)*0.8:0); p.y+=p.vy; p.r+=p.vr;
+      if(p.y<H+20){ alive++;
+        x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.globalAlpha=f>200?Math.max(0,1-(f-200)/60):1;
+        if(p.round){ x.beginPath(); x.arc(0,0,p.w/2.4,0,6.283); x.fill(); } else x.fillRect(-p.w/2,-p.h/2,p.w,p.h*Math.abs(Math.cos(f*0.1+p.ph))+1);
+        x.restore(); }
+    });
+    if(alive && f<260) requestAnimationFrame(frame); else c.remove();
+  })();
+}
+
+/* =========================================================
+   EXCEL
+   ========================================================= */
+const hasXLSX = () => { if(typeof XLSX==='undefined'){ toast('Excel tools need an internet connection — please reload'); return false; } return true; };
+function toSheetRows(mod, data){
+  const fields=MODS[mod].fields;
+  return data.map(r=>{ const o={}; fields.forEach(f=>{ let v=r[f.k]; if(Array.isArray(v)) v=v.join(', '); o[f.l]=v==null?'':v; }); return o; });
+}
+const fileBase = () => slug(`${S.settings.bride}-${S.settings.groom}-${side()||'guest'}`);
+function exportMod(mod){
+  if(!hasXLSX()) return;
+  const ws=XLSX.utils.json_to_sheet(toSheetRows(mod,rows(mod)),{header:MODS[mod].fields.map(f=>f.l)});
+  ws['!cols']=MODS[mod].fields.map(f=>({wch:Math.max(12,f.l.length+2)}));
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,MODS[mod].title.slice(0,30));
+  XLSX.writeFile(wb,`${fileBase()}-${mod}.xlsx`);
+}
+function exportAll(){
+  if(!hasXLSX()) return;
+  const wb=XLSX.utils.book_new();
+  const names={guests:'Guests',rooms:'Rooms',fleet:'Transport',events:'Events',menu:'Catering',budget:'Budget',vendors:'Vendors',shagun:'Shagun',tasks:'Checklist'};
+  Object.keys(MODS).forEach(m=>{ const ws=XLSX.utils.json_to_sheet(toSheetRows(m,rows(m)),{header:MODS[m].fields.map(f=>f.l)}); XLSX.utils.book_append_sheet(wb,ws,names[m]); });
+  XLSX.writeFile(wb,`${fileBase()}-wedding-manager.xlsx`);
+}
+function exportTravel(){
+  if(!hasXLSX()) return;
+  const keys=['name','side','phone','adults','kids','arrMode','arrDate','arrRef','arrPoint','pickup','depMode','depDate','depRef','drop','hotel','room','driver','carNo','driverPhone'];
+  const flds=keys.map(k=>MODS.guests.fields.find(f=>f.k===k));
+  const pool = ui.travelWho==='all' && acc(other()).share ? visibleGuests() : rows('guests');
+  const data=pool.filter(g=>g.rsvp!=='Declined').sort((x,y)=>new Date(x.arrDate||0)-new Date(y.arrDate||0)).map(r=>{ const o={}; flds.forEach(f=>o[f.l]=r[f.k]??''); return o; });
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(data),'Travel'); XLSX.writeFile(wb,`${fileBase()}-travel-desk.xlsx`);
+}
+function template(mod){
+  if(!hasXLSX()) return;
+  const ws=XLSX.utils.aoa_to_sheet([MODS[mod].fields.filter(f=>f.k!=='side').map(f=>f.l)]);
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,MODS[mod].title.slice(0,30)); XLSX.writeFile(wb,`${mod}-template.xlsx`);
+}
+const pad = n => String(n).padStart(2,'0');
+function normVal(f,v){
+  if(v==null || v==='') return '';
+  if(v instanceof Date){ if(f.t==='date') return `${v.getFullYear()}-${pad(v.getMonth()+1)}-${pad(v.getDate())}`; if(f.t==='datetime-local') return `${v.getFullYear()}-${pad(v.getMonth()+1)}-${pad(v.getDate())}T${pad(v.getHours())}:${pad(v.getMinutes())}`; if(f.t==='time') return `${pad(v.getHours())}:${pad(v.getMinutes())}`; return v.toLocaleString(); }
+  if(f.t==='multi') return String(v).split(/[,;]/).map(x=>x.trim()).filter(Boolean);
+  if(f.t==='number'||f.t==='money'){ const n=Number(String(v).replace(/[₹,\s]/g,'')); return isNaN(n)?'':n; }
+  if(f.t==='select'){ const m=f.o.find(o=>o.toLowerCase()===String(v).trim().toLowerCase()); return m||String(v).trim(); }
+  return String(v).trim();
+}
+function importFile(mod, file){
+  if(!hasXLSX()) return;
+  const fr=new FileReader();
+  fr.onload=()=>{ try{
+    const wb=XLSX.read(fr.result,{type:'array',cellDates:true});
+    const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+    const fields=MODS[mod].fields.filter(f=>f.k!=='side'); let n=0;
+    json.forEach(row=>{
+      const lk={}; Object.keys(row).forEach(k=>lk[k.trim().toLowerCase()]=row[k]);
+      const rec={id:uid()};
+      fields.forEach(f=>{ const v=lk[f.l.toLowerCase()] ?? lk[f.k.toLowerCase()]; const nv=normVal(f,v); if(nv!=='' && !(Array.isArray(nv)&&!nv.length)) rec[f.k]=nv; });
+      if(fields.filter(f=>f.req).some(f=>!rec[f.k])) return;
+      if(MODS[mod].fields.some(f=>f.k==='side')) rec.side = (mod==='guests'||mod==='shagun') ? side() : defaultSide(mod);
+      if(mod==='guests'){ rec.rsvp=rec.rsvp||'Pending'; rec.events=rec.events||[]; }
+      S[mod].push(rec); syncAfter(mod,rec); n++;
+    });
+    save(); render(); toast(n?`Imported ${n} ${n>1?'rows':'row'}`:'No matching rows found — use the template headers');
+  }catch(e){ toast('Could not read that file'); } };
+  fr.readAsArrayBuffer(file);
+}
+function readImage(file, cb){
+  const fr=new FileReader();
+  fr.onload=()=>{ const img=new Image(); img.onload=()=>{ const sc=Math.min(1,1800/img.width); const c=document.createElement('canvas'); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc); c.getContext('2d').drawImage(img,0,0,c.width,c.height); cb(c.toDataURL('image/jpeg',.82)); }; img.src=fr.result; };
+  fr.readAsDataURL(file);
+}
+
+/* =========================================================
+   RENDER & EVENTS
+   ========================================================= */
+const VIEWS = {dash:dashView,guests:guestsView,travel:travelView,rooms:roomsView,fleet:fleetView,events:eventsView,catering:cateringView,budget:budgetView,vendors:vendorsView,shagun:shagunView,tasks:tasksView,portal:portalView,settings:settingsView};
+function render(){
+  const app=$('#app');
+  if(!role){ app.innerHTML=landingView(); tick(); const p=$('#pinIn'); if(p) p.focus(); return; }
+  if(role==='guest'){ app.innerHTML=`<div class="pbg"><main class="main" style="padding-top:24px">${portalView()}</main></div>`; return; }
+  if(!navVisible(view) || !canOpen(view)) view='dash';
+  app.innerHTML=shell(VIEWS[view]());
+}
+function setRole(r, owner=false){
+  role=r; ui.pinFor=null; ui.owner=owner; ui.unlocked=[]; view=r==='guest'?'portal':'dash'; ui.portalDone=false;
+  saveSession(); render(); window.scrollTo(0,0);
+  if(r==='guest') setTimeout(popConfetti,250);
+}
+function logout(){
+  role=null; ui.owner=false; ui.unlocked=[]; ui.portalDone=false; ui.pinFor=null;
+  try{ sessionStorage.removeItem(STORE_KEY+'_s'); }catch(_){}
+  if(location.hash) try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){}
+  render(); window.scrollTo(0,0);
+}
+async function copyLink(){
+  const l=guestLink();
+  try{ await navigator.clipboard.writeText(l); toast('Guest link copied — paste it on WhatsApp'); }
+  catch(e){ try{ prompt('Copy this guest link:', l); }catch(_){ toast(l); } }
+}
+
+document.addEventListener('click', e=>{
+  const t=e.target.closest('[data-role],[data-nav],[data-act],[data-chip]'); if(!t) return;
+  if(t.dataset.role){ const r=t.dataset.role; if(r==='guest') return setRole('guest'); ui.pinFor=r; render(); return; }
+  if(t.dataset.nav){ const v=t.dataset.nav; if(!canOpen(v)) return openUnlock(v); view=v; render(); window.scrollTo(0,0); if(v==='portal') setTimeout(popConfetti,200); return; }
+  if(t.dataset.chip){ ui[t.dataset.chip]=t.dataset.v; render(); return; }
+  const a=t.dataset.act, mod=t.dataset.mod, id=t.dataset.id;
+  switch(a){
+    case 'logout': logout(); break;
+    case 'ownerUnlock': openUnlock('owner'); break;
+    case 'add': openForm(mod); break;
+    case 'edit': openForm(mod,id); break;
+    case 'close': closeModal(); break;
+    case 'del': if(confirm('Delete this entry?')){ S[mod]=S[mod].filter(x=>x.id!==id); save(); closeModal(); render(); toast('Deleted'); } break;
+    case 'approve': { const p=S.pending.find(x=>x.id===id); if(p){ const g=Object.assign({},p,{id:uid(),rsvp:'Confirmed',idProof:'Pending',welcomeKit:'Not given'}); delete g.submittedAt; S.guests.push(g); S.pending=S.pending.filter(x=>x.id!==id); save(); render(); toast(`${g.name} added to the guest list`); } break; }
+    case 'discard': if(confirm('Discard this reply?')){ S.pending=S.pending.filter(x=>x.id!==id); save(); render(); } break;
+    case 'import': { const fi=$('#fileIn'); fi.dataset.mod=mod; fi.value=''; fi.click(); break; }
+    case 'export': exportMod(mod); break;
+    case 'exportAll': exportAll(); break;
+    case 'exportTravel': exportTravel(); break;
+    case 'template': template(mod); break;
+    case 'copyLink': copyLink(); break;
+    case 'portalAgain': ui.portalDone=false; render(); window.scrollTo(0,0); break;
+    case 'upimg': { const fi=$('#imgIn'); fi.dataset.k=t.dataset.k; fi.value=''; fi.click(); break; }
+    case 'clrimg': S.settings[t.dataset.k]=''; save(); render(); break;
+    case 'backup': { const blob=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}); const u=URL.createObjectURL(blob); const l=document.createElement('a'); l.href=u; l.download=`${slug(S.settings.bride+'-'+S.settings.groom)}-backup.json`; l.click(); setTimeout(()=>URL.revokeObjectURL(u),1000); break; }
+    case 'restore': { const fi=$('#jsonIn'); fi.value=''; fi.click(); break; }
+    case 'sample': if(confirm('Replace everything with sample data? Your settings and PINs are kept.')){ const keep=S.settings; S=seed(); S.settings=keep; save(); render(); toast('Sample data loaded'); } break;
+    case 'wipe': if(confirm('Clear ALL guests, rooms, budget and records for BOTH families? Settings and PINs are kept. This cannot be undone.')){ const keep=S.settings; S={settings:keep,events:[],guests:[],rooms:[],fleet:[],menu:[],budget:[],vendors:[],shagun:[],tasks:[],pending:[]}; save(); render(); toast('All records cleared'); } break;
+  }
+});
+
+/* Forms are handled in script (not native submit) so they also work
+   inside sandboxed previews that block form submission. */
+document.addEventListener('submit', e=>{ if(e.target.dataset.form){ e.preventDefault(); handleForm(e.target); } });
+document.addEventListener('click', e=>{
+  const b=e.target.closest('button[type="submit"]'); if(!b) return;
+  const f=b.closest('form[data-form]'); if(!f) return;
+  e.preventDefault(); handleForm(f);
+}, true);
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ closeModal(); return; }
+  if(e.key!=='Enter' || e.target.tagName==='TEXTAREA' || e.target.tagName==='BUTTON') return;
+  const f=e.target.closest && e.target.closest('form[data-form]'); if(!f) return;
+  e.preventDefault(); handleForm(f);
+});
+function handleForm(f){
+  const kind=f.dataset.form; if(!kind) return;
+  if(f.checkValidity && !f.checkValidity()){ if(f.reportValidity) f.reportValidity(); toast('Please fill the required fields'); return; }
+  if(kind==='pin'){
+    const v=$('#pinIn').value.trim(), sd=ui.pinFor==='bride'?'Bride':'Groom', a=S.settings.access[sd];
+    if(v===String(a.owner)) setRole(ui.pinFor,true);
+    else if(v===String(a.family)) setRole(ui.pinFor,false);
+    else { toast('That PIN doesn’t match'); $('#pinIn').value=''; }
+    return;
+  }
+  if(kind==='unlock'){
+    const sec=f.dataset.sec, v=$('#unlockIn').value.trim(), a=acc();
+    if(v===String(a.owner)){ ui.owner=true; saveSession(); closeModal(); if(sec!=='owner') view=sec; render(); toast('Owner access unlocked'); return; }
+    if(sec!=='owner' && lockOf(sec)==='pin' && v && v===String((a.pins||{})[sec])){ ui.unlocked.push(sec); saveSession(); closeModal(); view=sec; render(); return; }
+    toast('That password doesn’t match'); $('#unlockIn').value=''; return;
+  }
+  if(kind==='crud'){
+    const mod=f.dataset.mod, id=f.dataset.id, fields=MODS[mod].fields;
+    const data=collect(f,fields);
+    let rec;
+    if(id){ rec=S[mod].find(x=>x.id===id); if(mod==='events') data._oldName=rec.name; Object.assign(rec,data); }
+    else { if(mod==='guests'||mod==='shagun') data.side=side(); rec=Object.assign({id:uid()},data); S[mod].push(rec); }
+    syncAfter(mod,rec); save(); closeModal(); render(); toast('Saved'); return;
+  }
+  if(kind==='portal'){
+    const flds=PORTAL_FIELDS.map(k=>MODS.guests.fields.find(x=>x.k===k));
+    const data=collect(f,flds); if(!data.name){ toast('Please add your name'); return; }
+    S.pending.push(Object.assign({id:uid(),submittedAt:new Date().toISOString()},data)); save();
+    if(role==='guest'){ ui.portalDone=true; render(); window.scrollTo(0,0); setTimeout(popConfetti,150); }
+    else { render(); toast(`Test reply sent — see ${sideName(data.side)}'s Guest List`); }
+    return;
+  }
+  if(kind==='settings'){
+    const s=S.settings, a=acc(), fd=new FormData(f);
+    const fam=String(fd.get('fam_pin')||'').trim(), own=String(fd.get('own_pin')||'').trim();
+    if(fam===own){ toast('Family PIN and Owner PIN must be different'); return; }
+    ['bride','groom','date','time','venue','hashtag','welcome'].forEach(k=>s[k]=String(fd.get(k)||'').trim());
+    ['heroImg','portalImg'].forEach(k=>{ const v=String(fd.get(k)||'').trim(); if(v) s[k]=v; else if(!(s[k]||'').startsWith('data:')) s[k]=''; });
+    a.family=fam; a.owner=own; a.budget=num(fd.get('side_budget')); a.share=!!fd.get('share');
+    a.locks=a.locks||{}; a.pins=a.pins||{}; const missing=[];
+    SECTIONS.forEach(([id,name])=>{ const m=String(fd.get('lock_'+id)||'open'), p=String(fd.get('pin_'+id)||'').trim();
+      a.pins[id]=p; if(m==='pin' && !p){ a.locks[id]='owner'; missing.push(name); } else a.locks[id]=m; });
+    save(); render();
+    toast(missing.length?`Saved. ${missing.join(', ')} set to Owner only — add a password to use “Own password”.`:'Settings saved');
+  }
+}
+
+document.addEventListener('input', e=>{
+  if(!e.target.matches('[data-search]')) return;
+  const q=e.target.value.toLowerCase(); const wrap=e.target.closest('.main').querySelector('.tablewrap'); if(!wrap) return;
+  wrap.querySelectorAll('tbody tr').forEach(tr=>{ tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+});
+$('#fileIn').addEventListener('change', e=>{ const file=e.target.files[0]; if(file) importFile(e.target.dataset.mod, file); });
+$('#imgIn').addEventListener('change', e=>{ const file=e.target.files[0]; if(!file) return; readImage(file, url=>{ S.settings[e.target.dataset.k]=url; save(); render(); toast('Photo updated'); }); });
+$('#jsonIn').addEventListener('change', e=>{ const file=e.target.files[0]; if(!file) return; const fr=new FileReader(); fr.onload=()=>{ try{ const d=JSON.parse(fr.result); if(!d.settings) throw 0; S=normalise(d); save(); render(); toast('Backup restored'); }catch(_){ toast('That isn’t a valid backup file'); } }; fr.readAsText(file); });
+$('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
+window.addEventListener('hashchange', ()=>{ if(location.hash==='#guest' && role!=='guest') setRole('guest'); });
+
+render();
+if(role==='guest') setTimeout(popConfetti,400);
+</script>
+</body>
+</html>
